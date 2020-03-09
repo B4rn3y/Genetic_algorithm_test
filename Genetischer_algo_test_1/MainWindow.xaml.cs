@@ -23,6 +23,10 @@ namespace Genetischer_algo_test_1
         public MainWindow()
         {
             InitializeComponent();
+
+            int inputs = 2, outputs = 1, population_size = 100;
+
+
         }
     }
 }
