@@ -36,19 +36,19 @@ namespace Genetischer_algo_test_1
             int counter = 0;
             for (int i = 0; i < inputs; i++)
             {
-                Node input_node = new Node(id, counter, true, false, false);
+                Node input_node = new Node(id, counter, true, false, false, false);
                 this.nn_nodes.Add(input_node);
                 counter++;
             }
 
             for (int i = 0; i < outputs; i++)
             {
-                Node output_node = new Node(id, counter, false, true, false);
+                Node output_node = new Node(id, counter, false, true, false, false);
                 this.nn_nodes.Add(output_node);
                 counter++;
             }
 
-            Node bias_node = new Node(id, counter, false, false, true);
+            Node bias_node = new Node(id, counter, false, false, true, false);
             this.nn_nodes.Add(bias_node);
         }
 
@@ -61,7 +61,7 @@ namespace Genetischer_algo_test_1
                 add_connection();
             }
             // mutate weight - cur. 80%
-            if (GetRandomNumber(0, 1) <= this.mutate_weight_prob)
+            if (GetRandomNumber(0, 1) <= this.mutate_weight_prob && nn_connections.Count > 0)
             {
                 mutate_connection_weight();
             }
@@ -70,7 +70,7 @@ namespace Genetischer_algo_test_1
             {
             }
             // remove a connection - cur. 2.5%
-            if (GetRandomNumber(0, 1) <= this.mutate_remove_connection_prob)
+            if (GetRandomNumber(0, 1) <= this.mutate_remove_connection_prob && nn_connections.Count > 0)
             {
             }
             // remove a node - cur. 0.5%
@@ -83,6 +83,8 @@ namespace Genetischer_algo_test_1
         {
             List<Node> start_nodes = new List<Node>();
             List<Node> end_nodes = new List<Node>();
+            List<Node> mutated_nodes = new List<Node>();
+
             // find out which Nodes are start notes and which arent
             for (int i = 0; i < nn_nodes.Count; i++)
             {
@@ -90,20 +92,51 @@ namespace Genetischer_algo_test_1
                 {
                     start_nodes.Add(nn_nodes[i]);
                 }
-                else
+                else if (nn_nodes[i].mutated)
+                {
+                    mutated_nodes.Add(nn_nodes[i]);
+                }
+                else 
                 {
                     end_nodes.Add(nn_nodes[i]);
                 }
             }
             // choose a random start and end node
             Random random = new Random();
+
+            /*
             Node start_node = start_nodes[random.Next(start_nodes.Count)];
             Node end_node = end_nodes[random.Next(end_nodes.Count)];
             // establish new Connection between these Nodes
             Connection new_Con = new Connection(start_node, end_node, minimum, maximum);
             // Add the Connection to the List Var of this Neural Network
             nn_connections.Add(new_Con);
+            */
             
+        }
+        // removes a connection random from the net !!!Watch Out!!! Connections to mutated Nodes should not be deleted!! ---- HIER MUSS ICH NOCHMAL RAN
+        void remove_connection()
+        {
+            List<Node> mutated_nodes = new List<Node>();
+            List<Connection> removable_cons = new List<Connection>();
+
+            for (int i = 0; i < nn_nodes.Count; i++)
+            {
+                bool v = !(nn_nodes[i].bias || nn_nodes[i].input || nn_nodes[i].output);
+                if (v)
+                {
+                    mutated_nodes.Add(nn_nodes[i]);
+                }
+            }
+
+            if (mutated_nodes.Count > 0)
+            {
+                for (int i = 0; i < nn_connections.Count; i++)
+                {
+
+                }
+            }
+
         }
         // mutates the weight of a connection in a given range
         void mutate_connection_weight()

@@ -12,15 +12,17 @@ namespace Genetischer_algo_test_1
         public bool input;
         public bool output;
         public bool bias;
+        public bool mutated;
         public int bias_weight = 0;
 
-        public Node(int nn_id, int id, bool input, bool output, bool bias)
+        public Node(int nn_id, int id, bool input, bool output, bool bias, bool mutated)
         {
             this.nn_id = nn_id;
             this.id = id;
             this.input = input;
             this.output = output;
             this.bias = bias;
+            this.mutated = mutated;
         }
     }
 }
