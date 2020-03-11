@@ -81,16 +81,18 @@ namespace Genetischer_algo_test_1
         // adds a new connection to the neural network when mutated especially
         void add_connection()
         {
+            List<Node> input_nodes = new List<Node>();
+            List<Node> output_nodes = new List<Node>();
             List<Node> start_nodes = new List<Node>();
-            List<Node> end_nodes = new List<Node>();
             List<Node> mutated_nodes = new List<Node>();
+            Node start_node, end_node;
 
             // find out which Nodes are start notes and which arent
             for (int i = 0; i < nn_nodes.Count; i++)
             {
                 if (nn_nodes[i].input || nn_nodes[i].bias)
                 {
-                    start_nodes.Add(nn_nodes[i]);
+                    input_nodes.Add(nn_nodes[i]);
                 }
                 else if (nn_nodes[i].mutated)
                 {
@@ -98,21 +100,75 @@ namespace Genetischer_algo_test_1
                 }
                 else 
                 {
-                    end_nodes.Add(nn_nodes[i]);
+                    output_nodes.Add(nn_nodes[i]);
                 }
             }
-            // choose a random start and end node
-            Random random = new Random();
+            // Join the input and mutated Notes list into the start nodes list
+            start_nodes.AddRange(input_nodes);
+            start_nodes.AddRange(mutated_nodes);
 
-            /*
-            Node start_node = start_nodes[random.Next(start_nodes.Count)];
-            Node end_node = end_nodes[random.Next(end_nodes.Count)];
-            // establish new Connection between these Nodes
-            Connection new_Con = new Connection(start_node, end_node, minimum, maximum);
-            // Add the Connection to the List Var of this Neural Network
-            nn_connections.Add(new_Con);
-            */
+            bool already_connected = false;
+            int counter = 0;
+            while (true)
+            {
+                counter++;
+                // choose a random start node
+                Random random = new Random();
+                start_node = start_nodes[random.Next(start_nodes.Count)];
+
+                // Join the mutated and output Nodes list together to find out to which Node the connection should go to
+                List<Node> end_nodes = new List<Node>();
+                end_nodes.AddRange(output_nodes);
+                // Check if which mutated Nodes can be added, one could have been selected as the start node so we have to check
+                for (int i = 0; i < mutated_nodes.Count; i++)
+                {
+                    if (!(mutated_nodes[i] == start_node))
+                    {
+                        end_nodes.Add(mutated_nodes[i]);
+                    }
+                }
+                // Select end node
+                end_node = end_nodes[random.Next(end_nodes.Count)];
+
+                // Check if the Node already has a connection to this Node
+                already_connected = false;
+                for (int i = 0; i < nn_connections.Count; i++)
+                {
+                    // if the Nodes are connected quit the loop, no need to further check other Connection sources and targets
+                    if (nn_connections[i].start_node == start_node && nn_connections[i].end_node == end_node)
+                    {
+                        already_connected = true;
+                        break;
+                    }
+                }
+
+                if (already_connected)
+                {
+                    if (counter >= 10000)
+                    {
+                        break;
+                    } else
+                    {
+                        continue;
+                    }
+                   
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            // Check if the Connection should be added or no suitable Connection could be found
+            if (!(already_connected))
+            {
+                // create the new Connection
+                Connection new_Con = new Connection(start_node, end_node, minimum, maximum);
+                // Add the Connection to the List Var of this Neural Network
+                nn_connections.Add(new_Con);
+            }
             
+
         }
         // removes a connection random from the net !!!Watch Out!!! Connections to mutated Nodes should not be deleted!! ---- HIER MUSS ICH NOCHMAL RAN
         void remove_connection()
@@ -122,8 +178,7 @@ namespace Genetischer_algo_test_1
 
             for (int i = 0; i < nn_nodes.Count; i++)
             {
-                bool v = !(nn_nodes[i].bias || nn_nodes[i].input || nn_nodes[i].output);
-                if (v)
+                if (!(nn_nodes[i].bias || nn_nodes[i].input || nn_nodes[i].output))
                 {
                     mutated_nodes.Add(nn_nodes[i]);
                 }
