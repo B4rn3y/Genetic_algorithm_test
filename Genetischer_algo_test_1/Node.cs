@@ -14,6 +14,7 @@ namespace Genetischer_algo_test_1
         public bool bias;
         public bool mutated;
         public int bias_weight = 0;
+        public int innovation_number;
 
         public Node(int nn_id, int id, bool input, bool output, bool bias, bool mutated)
         {

@@ -10,8 +10,9 @@ namespace Genetischer_algo_test_1
     {
         int id, species_id, inputs, outputs;
         int fitness = 0;
-        static double minimum = -1;
-        static double maximum = 1;
+        static int max_nodes_connection_add_switch = 50; // This is the amount of inputs needed for the add_connection method to switch used methods
+        static double minimum = -2;
+        static double maximum = 2;
         public double mutate_weight_prob = 0.8;
         public double mutate_connection_prob = 0.05;
         public double mutate_node_prob = 0.01;
@@ -81,6 +82,7 @@ namespace Genetischer_algo_test_1
         // adds a new connection to the neural network when mutated especially
         void add_connection()
         {
+            
             List<Node> input_nodes = new List<Node>();
             List<Node> output_nodes = new List<Node>();
             List<Node> start_nodes = new List<Node>();
@@ -106,7 +108,19 @@ namespace Genetischer_algo_test_1
             // Join the input and mutated Notes list into the start nodes list
             start_nodes.AddRange(input_nodes);
             start_nodes.AddRange(mutated_nodes);
+            // -----------------------------------------NEW SHIT BEGINS
 
+
+
+
+
+
+
+
+
+
+
+            //// --------------------------------------NEW SHIT END
             bool already_connected = false;
             int counter = 0;
             while (true)
