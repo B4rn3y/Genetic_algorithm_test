@@ -11,6 +11,7 @@ namespace Genetischer_algo_test_1
         public double minimum;
         public double maximum;
         public double weight;
+        public bool disabled = false;
         public Node start_node;
         public Node end_node;
         public int innovation_number;

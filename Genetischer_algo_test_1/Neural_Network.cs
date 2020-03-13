@@ -10,13 +10,16 @@ namespace Genetischer_algo_test_1
     {
         int id, species_id, inputs, outputs;
         int fitness = 0;
-        static int max_nodes_connection_add_switch = 50; // This is the amount of inputs needed for the add_connection method to switch used methods
+        int layers = 2;
+        int nodes_counter = 0;
+        static bool bias_enabled = false; // whether the bias node is enabeld or not
         static double minimum = -2;
         static double maximum = 2;
-        public double mutate_weight_prob = 0.8;
+        public double mutate_weight_random_prob = 0.8;
+        public double mutate_weight_shift_prob = 0.3;
         public double mutate_connection_prob = 0.05;
         public double mutate_node_prob = 0.01;
-        public double mutate_remove_connection_prob = 0.025;
+        public double mutate_enable_disable_connection = 0.025;
         public double mutate_remove_node_prob = 0.005;
         public List<Node> nn_nodes = new List<Node>();
         public List<Connection> nn_connections = new List<Connection>();
@@ -34,23 +37,29 @@ namespace Genetischer_algo_test_1
         // create the nework starting with the minimun Nodes needed for it (Input and Output Nodes + bias)
         void create_network(int inputs, int outputs, int id)
         {
-            int counter = 0;
             for (int i = 0; i < inputs; i++)
             {
-                Node input_node = new Node(id, counter, true, false, false, false);
+                Node input_node = new Node(id, nodes_counter, true, false, false, false, 0);
                 this.nn_nodes.Add(input_node);
-                counter++;
+                nodes_counter++;
             }
 
             for (int i = 0; i < outputs; i++)
             {
-                Node output_node = new Node(id, counter, false, true, false, false);
+                Node output_node = new Node(id, nodes_counter, false, true, false, false, 1);
                 this.nn_nodes.Add(output_node);
-                counter++;
+                nodes_counter++;
             }
 
-            Node bias_node = new Node(id, counter, false, false, true, false);
-            this.nn_nodes.Add(bias_node);
+            if (bias_enabled)
+            {
+                Node bias_node = new Node(id, nodes_counter, false, false, true, false, 0);
+                this.nn_nodes.Add(bias_node);
+            }
+            else
+            {
+                nodes_counter--;
+            }
         }
 
         // checks if to mutate the neural network
@@ -62,27 +71,146 @@ namespace Genetischer_algo_test_1
                 add_connection();
             }
             // mutate weight - cur. 80%
-            if (GetRandomNumber(0, 1) <= this.mutate_weight_prob && nn_connections.Count > 0)
+            if (GetRandomNumber(0, 1) <= this.mutate_weight_random_prob && nn_connections.Count > 0)
             {
-                mutate_connection_weight();
+                mutate_connection_weight_random();
             }
             // add new node - cur. 1%
             if (GetRandomNumber(0, 1) <= this.mutate_node_prob)
             {
             }
-            // remove a connection - cur. 2.5%
-            if (GetRandomNumber(0, 1) <= this.mutate_remove_connection_prob && nn_connections.Count > 0)
+            // enable_disable_connection - cur. 2.5%
+            if (GetRandomNumber(0, 1) <= this.mutate_enable_disable_connection && nn_connections.Count > 0)
             {
+                enable_disable_connection();
             }
-            // remove a node - cur. 0.5%
-            if (GetRandomNumber(0, 1) <= this.mutate_remove_node_prob)
+            // mutate the weight of a connection by dividing it - cur. 30%
+            if (GetRandomNumber(0, 1) <= this.mutate_weight_shift_prob)
             {
+                mutate_weight_shift();
             }
         }
+
+        void add_node()
+        {
+            Random random = new Random();
+            Connection connection_node_add = nn_connections[random.Next(nn_connections.Count)];
+            Node connection_start_node = connection_node_add.start_node;
+            Node connection_end_node = connection_node_add.end_node;
+            double connection_weight = connection_node_add.weight;
+            bool connection_disabled = connection_node_add.disabled;
+            nn_connections.Remove(connection_node_add);
+            int start_layer = connection_start_node.layer;
+            int end_layer = connection_end_node.layer;
+            int new_node_layer;
+            // The nodes are on the same layer
+            if ((end_layer - start_layer) == 0)
+            {
+                // 2 layers for the nodes, +1 for the output layer and +1 because the nodes start counting with 0 and the var layers doesnt :X
+                if (start_layer + 4 > layers) //////////////////////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! HIER MUSS ICH NOCHMAL RAN LOGIK FEHLER VORHANDEN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                {
+                    layers += 4;
+                    for (int n = 0; n < nn_nodes.Count; n++)
+                    {
+
+                        Node cur_node = nn_nodes[n];
+                        if (cur_node.layer > start_layer)
+                        {
+                            cur_node.layer++;
+                        }
+                        else if (cur_node == connection_end_node)
+                        {
+                            cur_node.layer += 2;
+                        }
+                    }
+                }
+                new_node_layer = start_layer + 1;
+
+
+
+            }
+            else if ((end_layer - start_layer) == 1) // the nodes are one layer apart
+            {
+                // increment the layer var of the network
+                layers++;
+                // increment the layer var of all Nodes sitting in an equal or higher layer than the end Node of the deleted Connection
+                for (int n = 0; n < nn_nodes.Count; n++)
+                {
+                    Node cur_node = nn_nodes[n];
+                    if (cur_node.layer >= end_layer)
+                    {
+                        cur_node.layer++;
+                    }
+                }
+                new_node_layer = end_layer;
+            }
+            else // The nodes are more than 1 layer apart
+            {
+                new_node_layer = start_layer + 1;
+            }
+
+            // create the new Node and the 2 new connections of it
+            Node new_node = new Node(id, nn_nodes.Count - 1, false, false, false, true, new_node_layer);
+            nn_nodes.Add(new_node);
+            Connection to_connection = new Connection(connection_start_node, new_node, minimum, maximum);
+            to_connection.weight = 1;
+            nn_connections.Add(to_connection);
+            Connection from_connection = new Connection(new_node, connection_end_node, minimum, maximum);
+            from_connection.disabled = connection_disabled;
+            from_connection.weight = connection_weight;
+            nn_connections.Add(from_connection);
+
+        }
+
         // adds a new connection to the neural network when mutated especially
         void add_connection()
         {
-            
+            // Make a list to store all possible Connections
+            List<Connection> possible_connections = new List<Connection>();
+            // Loop through every Node
+            for (int i = 0; i < nn_nodes.Count; i++)
+            {
+                Node cur_start_node = nn_nodes[i];
+                // Only consider it a start node when its a mutated/input/bias node
+                if(!(cur_start_node.output))
+                {
+                    // Loop through every Node with every Node to find every possible Connection
+                    for (int k = 0; k < nn_nodes.Count; k++)
+                    {
+                        Node cur_end_node = nn_nodes[k];
+                        // Connection only possible when: The Nodes arent the same node; the layer of the end Node is higher or equal to the layer of the start node; the end node cant be a input or bias node
+                        if (!(cur_start_node == cur_end_node) && cur_end_node.layer >= cur_start_node.layer && !(cur_end_node.input || cur_end_node.bias))
+                        {
+                            // check every established connection if this connection already exists
+                            bool new_connection = true;
+                            for (int h = 0; h < nn_nodes.Count; h++)
+                            {
+                                Connection connection_to_check = nn_connections[h];
+                                if (connection_to_check.start_node == cur_end_node && connection_to_check.end_node == cur_end_node)
+                                {
+                                    new_connection = false;
+                                    break;
+                                }
+                            }
+                            // if it doesnt exist add the Connection to the possible connections list
+                            if (new_connection)
+                            {
+                                possible_connections.Add(new Connection(cur_start_node, cur_end_node, minimum, maximum));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // select a random Connection from the possible Connection list - only when list is full of course XD
+            if (possible_connections.Count > 0)
+            {
+                Random random = new Random();
+                nn_connections.Add(possible_connections[random.Next(possible_connections.Count)]);
+            }
+
+
+            /*
             List<Node> input_nodes = new List<Node>();
             List<Node> output_nodes = new List<Node>();
             List<Node> start_nodes = new List<Node>();
@@ -100,7 +228,7 @@ namespace Genetischer_algo_test_1
                 {
                     mutated_nodes.Add(nn_nodes[i]);
                 }
-                else 
+                else
                 {
                     output_nodes.Add(nn_nodes[i]);
                 }
@@ -108,19 +236,7 @@ namespace Genetischer_algo_test_1
             // Join the input and mutated Notes list into the start nodes list
             start_nodes.AddRange(input_nodes);
             start_nodes.AddRange(mutated_nodes);
-            // -----------------------------------------NEW SHIT BEGINS
-
-
-
-
-
-
-
-
-
-
-
-            //// --------------------------------------NEW SHIT END
+            
             bool already_connected = false;
             int counter = 0;
             while (true)
@@ -181,38 +297,38 @@ namespace Genetischer_algo_test_1
                 // Add the Connection to the List Var of this Neural Network
                 nn_connections.Add(new_Con);
             }
+            */
             
 
         }
-        // removes a connection random from the net !!!Watch Out!!! Connections to mutated Nodes should not be deleted!! ---- HIER MUSS ICH NOCHMAL RAN
-        void remove_connection()
+        // enables a disabled connection or disables a enabled connection if random chosen
+        void enable_disable_connection()
         {
-            List<Node> mutated_nodes = new List<Node>();
-            List<Connection> removable_cons = new List<Connection>();
-
-            for (int i = 0; i < nn_nodes.Count; i++)
+            if (nn_connections.Count > 0)
             {
-                if (!(nn_nodes[i].bias || nn_nodes[i].input || nn_nodes[i].output))
-                {
-                    mutated_nodes.Add(nn_nodes[i]);
-                }
-            }
-
-            if (mutated_nodes.Count > 0)
-            {
-                for (int i = 0; i < nn_connections.Count; i++)
-                {
-
-                }
+                Random random = new Random();
+                Connection con_to_mutate = nn_connections[random.Next(nn_connections.Count)];
+                con_to_mutate.disabled = !(con_to_mutate.disabled);
             }
 
         }
         // mutates the weight of a connection in a given range
-        void mutate_connection_weight()
+        void mutate_connection_weight_random()
         {
             Random random = new Random();
             Connection connection_to_mutate = nn_connections[random.Next(nn_connections.Count)];
             connection_to_mutate.weight = GetRandomNumber(minimum, maximum);
+        }
+
+        // shift the weight of a connection by dividing it by 2
+        void mutate_weight_shift()
+        {
+            Random random = new Random();
+            Connection connection_to_mutate = nn_connections[random.Next(nn_connections.Count)];
+            if (connection_to_mutate.weight != 0)
+            {
+                connection_to_mutate.weight = connection_to_mutate.weight / 2;
+            }
         }
 
         static double GetRandomNumber(double minimum, double maximum)
