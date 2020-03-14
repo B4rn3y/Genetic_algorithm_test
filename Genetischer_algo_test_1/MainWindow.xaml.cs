@@ -33,7 +33,7 @@ namespace Genetischer_algo_test_1
             if (!(TextBox_set_pop_size.Text == String.Empty))
             {
                 int pop_size = int.Parse(TextBox_set_pop_size.Text);
-                Console.WriteLine(String.Format("{0}", pop_size));
+                Console.WriteLine(String.Format("Population Size: {0}", pop_size));
             }
             else
             {

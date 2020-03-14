@@ -33,7 +33,7 @@ namespace Genetischer_algo_test_1
             this.outputs = outputs;
         }
 
-        public List<double> get_output()
+        public List<double> get_output(List<double> the_inputs)
         {
             List<double> result = new List<double>();
 
