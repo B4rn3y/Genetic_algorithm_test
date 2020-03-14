@@ -13,3 +13,18 @@ C:\Users\Robert\Desktop\Coding\Genetic_algorithm_test\Genetischer_algo_test_1\ob
 C:\Users\Robert\Desktop\Coding\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.csproj.CoreCompileInputs.cache
 C:\Users\Robert\Desktop\Coding\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.exe
 C:\Users\Robert\Desktop\Coding\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.pdb
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\bin\Debug\Genetischer_algo_test_1.exe.config
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\bin\Debug\Genetischer_algo_test_1.exe
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\bin\Debug\Genetischer_algo_test_1.pdb
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.csprojAssemblyReference.cache
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\MainWindow.g.cs
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\App.g.cs
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1_MarkupCompile.cache
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1_MarkupCompile.lref
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\MainWindow.baml
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.g.resources
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.Properties.Resources.resources
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.csproj.GenerateResource.cache
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.csproj.CoreCompileInputs.cache
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.exe
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.pdb

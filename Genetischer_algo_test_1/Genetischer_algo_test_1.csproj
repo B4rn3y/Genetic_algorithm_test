@@ -70,6 +70,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NEAT_management.cs" />
+    <Compile Include="Net_Drawer.cs" />
     <Compile Include="Neural_Network.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

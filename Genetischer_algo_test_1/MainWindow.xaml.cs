@@ -23,10 +23,24 @@ namespace Genetischer_algo_test_1
         public MainWindow()
         {
             InitializeComponent();
+            
 
-            int inputs = 2, outputs = 1, population_size = 100;
 
+        }
 
+        private async void start_stop_neat(object sender, RoutedEventArgs e)
+        {
+            if (!(TextBox_set_pop_size.Text == String.Empty))
+            {
+                int pop_size = int.Parse(TextBox_set_pop_size.Text);
+                Console.WriteLine(String.Format("{0}", pop_size));
+            }
+            else
+            {
+                textblock_show_error_messages.Text = "No Population Size has" + Environment.NewLine + "been entered!";
+                await Task.Delay(30000);
+                textblock_show_error_messages.Text = "";
+            }
         }
     }
 }

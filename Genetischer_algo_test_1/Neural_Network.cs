@@ -32,6 +32,13 @@ namespace Genetischer_algo_test_1
             this.inputs = inputs;
             this.outputs = outputs;
         }
+
+        public List<double> get_output()
+        {
+            List<double> result = new List<double>();
+
+            return result;
+        }
             
 
         // create the nework starting with the minimun Nodes needed for it (Input and Output Nodes + bias)
@@ -78,6 +85,7 @@ namespace Genetischer_algo_test_1
             // add new node - cur. 1%
             if (GetRandomNumber(0, 1) <= this.mutate_node_prob)
             {
+                add_node();
             }
             // enable_disable_connection - cur. 2.5%
             if (GetRandomNumber(0, 1) <= this.mutate_enable_disable_connection && nn_connections.Count > 0)
@@ -90,6 +98,44 @@ namespace Genetischer_algo_test_1
                 mutate_weight_shift();
             }
         }
+        // checks whether some nodes that are connected sit on the same layer(what they shouldnt); if it finds something like this it takes action by incrementing the layer of the end node. This does it as long as its needed for the net to be in order again
+        void check_net_nature()
+        {
+            while (true)
+            {
+                bool fixed_a_node = false;
+                for (int c = 0; c < nn_connections.Count; c++)
+                {
+                    Connection cur_connection = nn_connections[c];
+                    if (cur_connection.start_node.layer == cur_connection.end_node.layer)
+                    {
+                        fixed_a_node = true;
+                        Node node_to_increment_layer_of = cur_connection.end_node;
+                        int cur_layer = node_to_increment_layer_of.layer;
+                        if (cur_layer + 1 >= layers - 1) // theres no other layer we could increment to => create a new layer
+                        {
+                            layers++;
+                            for (int i = 0; i < nn_nodes.Count; i++)
+                            {
+                                if (nn_nodes[i].layer > cur_layer || nn_nodes[i] == node_to_increment_layer_of)
+                                {
+                                    nn_nodes[i].layer += 1;
+                                }
+                            }
+                        }
+                        else // theres a layer we can simply add the node to :p
+                        {
+                            node_to_increment_layer_of.layer += 1;
+                        }
+
+                    }
+                }
+                if(!(fixed_a_node))
+                {
+                    break;
+                }
+            }
+        }
 
         void add_node()
         {
@@ -100,6 +146,7 @@ namespace Genetischer_algo_test_1
             double connection_weight = connection_node_add.weight;
             bool connection_disabled = connection_node_add.disabled;
             nn_connections.Remove(connection_node_add);
+            /*
             int start_layer = connection_start_node.layer;
             int end_layer = connection_end_node.layer;
             int new_node_layer;
@@ -107,9 +154,9 @@ namespace Genetischer_algo_test_1
             if ((end_layer - start_layer) == 0)
             {
                 // 2 layers for the nodes, +1 for the output layer and +1 because the nodes start counting with 0 and the var layers doesnt :X
-                if (start_layer + 4 > layers) //////////////////////////////////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! HIER MUSS ICH NOCHMAL RAN LOGIK FEHLER VORHANDEN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                if (start_layer + 4 > layers)
                 {
-                    layers += 4;
+                    layers += (start_layer + 4 - layers);
                     for (int n = 0; n < nn_nodes.Count; n++)
                     {
 
@@ -148,9 +195,9 @@ namespace Genetischer_algo_test_1
             {
                 new_node_layer = start_layer + 1;
             }
-
+            */
             // create the new Node and the 2 new connections of it
-            Node new_node = new Node(id, nn_nodes.Count - 1, false, false, false, true, new_node_layer);
+            Node new_node = new Node(id, nn_nodes.Count - 1, false, false, false, true, connection_start_node.layer);
             nn_nodes.Add(new_node);
             Connection to_connection = new Connection(connection_start_node, new_node, minimum, maximum);
             to_connection.weight = 1;
@@ -159,6 +206,7 @@ namespace Genetischer_algo_test_1
             from_connection.disabled = connection_disabled;
             from_connection.weight = connection_weight;
             nn_connections.Add(from_connection);
+            check_net_nature();
 
         }
 
@@ -207,6 +255,7 @@ namespace Genetischer_algo_test_1
             {
                 Random random = new Random();
                 nn_connections.Add(possible_connections[random.Next(possible_connections.Count)]);
+                check_net_nature();
             }
 
 
@@ -315,19 +364,25 @@ namespace Genetischer_algo_test_1
         // mutates the weight of a connection in a given range
         void mutate_connection_weight_random()
         {
-            Random random = new Random();
-            Connection connection_to_mutate = nn_connections[random.Next(nn_connections.Count)];
-            connection_to_mutate.weight = GetRandomNumber(minimum, maximum);
+            if(nn_connections.Count > 0)
+            { 
+                Random random = new Random();
+                Connection connection_to_mutate = nn_connections[random.Next(nn_connections.Count)];
+                connection_to_mutate.weight = GetRandomNumber(minimum, maximum);
+            }
         }
 
         // shift the weight of a connection by dividing it by 2
         void mutate_weight_shift()
         {
-            Random random = new Random();
-            Connection connection_to_mutate = nn_connections[random.Next(nn_connections.Count)];
-            if (connection_to_mutate.weight != 0)
+            if (nn_connections.Count > 0)
             {
-                connection_to_mutate.weight = connection_to_mutate.weight / 2;
+                Random random = new Random();
+                Connection connection_to_mutate = nn_connections[random.Next(nn_connections.Count)];
+                if (connection_to_mutate.weight != 0)
+                {
+                    connection_to_mutate.weight = connection_to_mutate.weight / 2;
+                }
             }
         }
 
