@@ -12,7 +12,7 @@ namespace Genetischer_algo_test_1
         int fitness = 0;
         int layers = 2;
         int nodes_counter = 0;
-        static bool bias_enabled = false; // whether the bias node is enabeld or not
+        static bool bias_enabled = true; // whether the bias node is enabeld or not
         static double minimum = -2;
         static double maximum = 2;
         public double mutate_weight_random_prob = 0.8;
@@ -31,23 +31,76 @@ namespace Genetischer_algo_test_1
             this.id = id;
             this.inputs = inputs;
             this.outputs = outputs;
+            
         }
-
+        // calculate the output for the net depending on the input - WIP
         public List<double> get_output(List<double> the_inputs)
         {
             List<double> result = new List<double>();
+            // loop through every layer and calculate the values of the connections and the status of the nodes
+            for (int i = 0; i < layers; i++)
+            {
+                if (i == 0) // first layer
+                {
+                    int counter = 0;
+                    List<Node> input_nodes = new List<Node>();
+                    for (int k = 0; k < nn_nodes.Count; k++)
+                    {
+                        if (nn_nodes[k].input)
+                        {
+                            input_nodes.Add(nn_nodes[k]);
+                            nn_nodes[k].value = the_inputs[counter];
+                            counter++;
+                        }
+                        else if (nn_nodes[k].bias)
+                        {
+                            input_nodes.Add(nn_nodes[k]);
+                        }
+                    }
+                    for (int h = 0; h < nn_connections.Count; h++)
+                    {
+                        if (input_nodes.Contains(nn_connections[h].start_node))
+                        {
+                            // do not multiply with the bias node! output = sum(weights*inputs)+bias // bias is always 1
+                            if(nn_connections[h].start_node.bias)
+                            {
+                                nn_connections[h].bias = true;
+                                nn_connections[h].value = nn_connections[h].start_node.value;
+                            } else
+                            {
+                                nn_connections[h].value = nn_connections[h].start_node.value * nn_connections[h].weight;
+                            }
+                        }
+                    }
+                } else if (i+1 == layers) // last layer
+                {
+                    
+                }
+                else
+                {
+
+                }
+            }
 
             return result;
         }
-            
 
-        // create the nework starting with the minimun Nodes needed for it (Input and Output Nodes + bias)
+        public static double Sigmoid(double value)
+        {
+            return 1.0f / (1.0f + Math.Exp(-value));
+        }
+
+        // create the nework starting with the minimun Nodes needed for it (Input and Output Nodes + bias) + the Connections
         void create_network(int inputs, int outputs, int id)
         {
+            List<Node> input_nodes = new List<Node>();
+            List<Node> output_nodes = new List<Node>();
+
             for (int i = 0; i < inputs; i++)
             {
                 Node input_node = new Node(id, nodes_counter, true, false, false, false, 0);
                 this.nn_nodes.Add(input_node);
+                input_nodes.Add(input_node);
                 nodes_counter++;
             }
 
@@ -55,17 +108,28 @@ namespace Genetischer_algo_test_1
             {
                 Node output_node = new Node(id, nodes_counter, false, true, false, false, 1);
                 this.nn_nodes.Add(output_node);
+                output_nodes.Add(output_node);
                 nodes_counter++;
             }
 
             if (bias_enabled)
             {
                 Node bias_node = new Node(id, nodes_counter, false, false, true, false, 0);
+                bias_node.value = 1;
                 this.nn_nodes.Add(bias_node);
+                input_nodes.Add(bias_node);
             }
             else
             {
                 nodes_counter--;
+            }
+            // create connections from every input node to every output node
+            for (int i = 0; i < input_nodes.Count; i++)
+            {
+                for(int k = 0; k < output_nodes.Count; k++)
+                {
+                    nn_connections.Add(new Connection(input_nodes[i],output_nodes[k],minimum,maximum));
+                }
             }
         }
 

@@ -14,6 +14,7 @@ namespace Genetischer_algo_test_1
         public bool bias;
         public bool mutated;
         public int bias_weight = 0;
+        public double value = 0;
         public int layer;
         public int innovation_number;
         public double calculated_output;
