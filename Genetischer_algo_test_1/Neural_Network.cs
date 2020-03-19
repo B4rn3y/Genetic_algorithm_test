@@ -9,9 +9,9 @@ namespace Genetischer_algo_test_1
     class Neural_Network
     {
         int id, species_id, inputs, outputs;
-        int fitness = 0;
-        int layers = 2;
-        int nodes_counter = 0;
+        public int fitness = 0;
+        public int layers = 2;
+        public int nodes_counter = 0;
         static bool bias_enabled = true; // whether the bias node is enabeld or not
         static double minimum = -2;
         static double maximum = 2;
