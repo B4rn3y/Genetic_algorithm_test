@@ -31,12 +31,13 @@ namespace Genetischer_algo_test_1
             this.id = id;
             this.inputs = inputs;
             this.outputs = outputs;
-            
+            create_network(inputs, outputs, id);
         }
         // calculate the output for the net depending on the input - WIP
         public List<double> get_output(List<double> the_inputs)
         {
             List<double> result = new List<double>();
+            List<Node> output_nodes = new List<Node>();
             // loop through every layer and calculate the values of the connections and the status of the nodes
             for (int i = 0; i < layers; i++)
             {
@@ -74,17 +75,84 @@ namespace Genetischer_algo_test_1
                     }
                 } else if (i+1 == layers) // last layer
                 {
-                    
-                }
-                else
-                {
+                    for(int j = 0;j<nn_nodes.Count;j++)
+                    {
+                        if(nn_nodes[j].output)
+                        {
+                            output_nodes.Add(nn_nodes[j]);
+                        }
+                    }
 
+                    for(int u = 0; u<output_nodes.Count;u++)
+                    {
+                        Node cur_node = output_nodes[u];
+                        for(int o = 0; o<nn_connections.Count; o++)
+                        {
+                            Connection cur_connection = nn_connections[o];
+                            if(cur_connection.end_node == cur_node)
+                            {
+                                cur_node.value += cur_connection.value;
+                            }
+                        }
+                    }
+                }
+                else // hidden layer/s
+                {
+                    List<Node> nodes_current_layer = new List<Node>();
+                    List<Connection> leading_connection = new List<Connection>();
+                    // find nodes of the current layer
+                    for (int k = 0; k < nn_nodes.Count; k++)
+                    {
+                        if (nn_nodes[k].layer == i)
+                        {
+                            nodes_current_layer.Add(nn_nodes[k]);
+                        }
+                    }
+                    for (int a = 0; a < nodes_current_layer.Count; a++)
+                    {
+                        Node cur_node = nodes_current_layer[a];
+                        // find connections of this Node
+                        for (int h = 0; h < nn_connections.Count; h++)
+                        {
+                            Connection cur_connection = nn_connections[h];
+                            if(cur_connection.start_node == cur_node)
+                            {
+                                leading_connection.Add(cur_connection);
+                            }
+                            else if(cur_connection.end_node == cur_node)
+                            {
+                                cur_node.value += cur_connection.value;
+                            }
+                        }
+                    }
+                    // Calculate the values of all Connections going to upper layers from this layer out
+                    for(int g = 0; g<leading_connection.Count; g++)
+                    {
+                        leading_connection[g].value = leading_connection[g].start_node.value * leading_connection[g].weight;
+                    }
                 }
             }
-
+            // calculate the output by sumbitting every value of every output node to the sigmoid delivery function and return it as a list of doubles to be used in the fittness function
+            for(int i = 0; i<output_nodes.Count; i++)
+            {
+                result.Add(Sigmoid(output_nodes[i].value));
+            }
+            reset_net_values();
             return result;
         }
-
+        // reset the values of all nodes and connections
+        public void reset_net_values()
+        {
+            for(int i = 0; i<nn_connections.Count;i++)
+            {
+                nn_connections[i].value = 0;
+            }
+            for (int i = 0; i < nn_nodes.Count; i++)
+            {
+                nn_nodes[i].value = 0;
+            }
+        }
+        // sigmoid function - used as a delivery function for the outputs of the neural network
         public static double Sigmoid(double value)
         {
             return 1.0f / (1.0f + Math.Exp(-value));

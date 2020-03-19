@@ -8,6 +8,8 @@ namespace Genetischer_algo_test_1
 {
     class Net_Drawer
     {
-        
+        public double stackpanel_width;
+        public double width;
+        public double height;
     }
 }

@@ -55,7 +55,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Column="0" Grid.ColumnSpan="4" MinWidth="253" MaxWidth="254" Grid.Row="0" Grid.RowSpan="16" Background="#1C1C1C" Margin="0,0,0,0" x:Name="Stackpanel_w_controls">
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="4" MinWidth="253" MaxWidth="254" Grid.Row="0" Grid.RowSpan="16" Background="#1C1C1C" Margin="0,0,0,0" x:Name="Stackpanel_w_controls" >
             <Button Background="#1C1C1C"  Foreground="orange" BorderBrush="#1C1C1C" FontSize="25" FontFamily="Century Gothic" FontWeight="Bold" Height="50" x:Name="BTN_start_stop" Click="start_stop_neat">Start</Button>
             <Grid>
                 <Grid.ColumnDefinitions>
