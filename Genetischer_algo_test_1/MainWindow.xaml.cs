@@ -33,7 +33,9 @@ namespace Genetischer_algo_test_1
 
             updater_log.log_box = Textbox_log_display;
             managment.updater = updater_log;
+            drawer.updater = updater_log;
             managment.drawer = drawer;
+            drawer.main_grid = net_grid;
         }
 
         internal NEAT_management Managment { get => managment; set => managment = value; }
@@ -54,6 +56,7 @@ namespace Genetischer_algo_test_1
                 BTN_start_stop.Content = "Start";
                 Console.WriteLine("NEAT Stopped");
                 updater_log.update_log("NEAT Stopped");
+                Managment.remove_display();
 
             } else if (!(TextBox_set_pop_size.Text == String.Empty))
             {
@@ -100,14 +103,29 @@ namespace Genetischer_algo_test_1
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            
+            FrameworkElement pnlClient = this.Content as FrameworkElement;
+            if (pnlClient != null)
+            {
+                Window_width = pnlClient.ActualWidth;
+                Window_height = pnlClient.ActualHeight;
+                Console.WriteLine(String.Format("Window:{0}:{1}", pnlClient.ActualWidth, pnlClient.ActualHeight));
+            }
+        }
+
+        private void Canvas_draw_Loaded(object sender, RoutedEventArgs e)
+        {
+            drawer.mycanvas = canvas_draw;
+            /*
             FrameworkElement pnlClient = this.Content as FrameworkElement;
             if (pnlClient != null)
             {
                 Window_width = pnlClient.ActualWidth;
                 Window_height = pnlClient.ActualHeight;
 
-                Console.WriteLine(String.Format("{0}:{1}", Window_width, Window_height));
+                Console.WriteLine(String.Format("Canvas:{0}:{1} - {2}:{3}", Window_width, Window_height, canvas_draw.ActualWidth, canvas_draw.ActualHeight));
             }
+            */
         }
     }
 }

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace Genetischer_algo_test_1
 {
@@ -11,26 +14,204 @@ namespace Genetischer_algo_test_1
         public double stackpanel_width = 0;
         public double width = 0;
         public double height = 0;
-        public int border_margin = 20;
+        public Grid main_grid;
+        public Canvas mycanvas;
+        public Log_Updater updater;
+        public List<Ellipse> ellipses = new List<Ellipse>();
+        public List<int> ellipses_int_list = new List<int>();
+        public List<Line> lines = new List<Line>();
+        public Neural_Network cur_net;
 
         public void draw_net(Neural_Network net)
         {
-            double max_x = width - border_margin;
-            double min_x = stackpanel_width + border_margin;
-            double max_y = height - border_margin;
-            double min_y = 0 + border_margin;
+            cur_net = net;
+            // delete every ellipse drawn on the screen
+            for(int k = 0; k<ellipses.Count; k++)
+            {
+                mycanvas.Children.Remove(ellipses[k]);
+            }
 
-            for(int i = 0; i<net.layers; i++)
+            double layer_distance = mycanvas.ActualWidth / (net.layers + 1);
+
+            for (int i = 0; i < net.layers; i++)
             {
                 List<Node> nodes_to_draw = new List<Node>();
-                for(int k = 0; k<net.nn_nodes.Count; k++)
+                for (int k = 0; k < net.nn_nodes.Count; k++)
                 {
-                    if(net.nn_nodes[k].layer == i)
+                    if (net.nn_nodes[k].layer == i)
                     {
                         nodes_to_draw.Add(net.nn_nodes[k]);
                     }
                 }
+
+                double node_distance_height = mycanvas.ActualHeight / (nodes_to_draw.Count + 1);
+                double x = layer_distance * (i+1);
+                // draw every node
+                for (int r = 0; r < nodes_to_draw.Count; r++)
+                {
+                    double y = node_distance_height * (r+1);
+                    draw_circle(x,y, nodes_to_draw[r]);
+                }
             }
+
+            draw_lines();
+        }
+
+
+
+        public void remove_all_net_elements()
+        {
+            // delete every ellipse drawn on the screen
+            for (int k = 0; k < ellipses.Count; k++)
+            {
+                mycanvas.Children.Remove(ellipses[k]);
+            }
+            // delete existing lines
+            for (int i = 0; i < lines.Count; i++)
+            {
+                mycanvas.Children.Remove(lines[i]);
+            }
+            // delete vars
+            ellipses = new List<Ellipse>();
+            lines = new List<Line>();
+            ellipses_int_list = new List<int>();
+        }
+
+
+
+
+        // a funciton to return all nodes this node is leading to
+        public List<Connection> find_node_connections_by_id(int node_id)
+        {
+            Node start_node = null;
+            List<Connection> connections = new List<Connection>();
+            // Loop through every node to find the node to this specific id
+            for(int i = 0; i<cur_net.nn_nodes.Count; i++)
+            {
+                if(cur_net.nn_nodes[i].id == node_id)
+                {
+                    start_node = cur_net.nn_nodes[i];
+                    break;
+                }
+            }
+
+            if (start_node == null)
+            {
+                return connections;
+            }
+            else
+            {
+                // loop through all connections to find every node this node is leading to
+                for (int i = 0; i < cur_net.nn_connections.Count; i++)
+                {
+                    if(cur_net.nn_connections[i].start_node == start_node)
+                    {
+                        connections.Add(cur_net.nn_connections[i]);
+                    }
+                }
+                return connections;
+            }
+        }
+
+        public void draw_lines()
+        {
+            // delete existing lines
+            for(int i = 0; i<lines.Count; i++)
+            {
+                mycanvas.Children.Remove(lines[i]);
+            }
+
+            for(int n = 0; n<ellipses.Count; n++)
+            {
+                Ellipse cur_ellipse = ellipses[n];
+                int node_id = ellipses_int_list[n];
+
+                List<Connection> connections = find_node_connections_by_id(node_id);
+                // there r nodes this node leads to
+                if(connections.Count > 0)
+                {
+                    // loop through this nodes to find the ellipse representing it
+                    for(int i = 0; i< connections.Count;i++)
+                    {
+                        // save the id we r currently looking for
+                        Connection cur_connection = connections[i];
+                        int node_id_to_look_for = cur_connection.end_node.id;
+                        // loop through every drawn ellipse and compare it to our id
+                        for(int a = 0; a<ellipses_int_list.Count; a++)
+                        {
+                            // if id matches draw the line
+                            if(node_id_to_look_for == ellipses_int_list[a])
+                            {
+                                double start_ellipse_x = Canvas.GetLeft(cur_ellipse)+20;
+                                double start_ellipse_y = Canvas.GetTop(cur_ellipse)+10;
+
+                                double end_ellipse_x = Canvas.GetLeft(ellipses[a]);
+                                double end_ellipse_y = Canvas.GetTop(ellipses[a])+10;
+
+                                Line cur_line = new Line();
+                                mycanvas.Children.Add(cur_line);
+                                lines.Add(cur_line);
+
+                                cur_line.StrokeThickness = 2;
+
+                                if(cur_connection.disabled)
+                                {
+                                    cur_line.Stroke = Brushes.Yellow;
+                                } else if(cur_connection.weight > 0)
+                                {
+                                    cur_line.Stroke = Brushes.Red;
+                                } else if(cur_connection.weight < 0)
+                                {
+                                    cur_line.Stroke = Brushes.Blue;
+                                } else
+                                {
+                                    cur_line.Stroke = Brushes.Black;
+                                }
+                                cur_line.X1 = start_ellipse_x;
+                                cur_line.Y1 = start_ellipse_y;
+
+                                cur_line.X2 = end_ellipse_x;
+                                cur_line.Y2 = end_ellipse_y;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void draw_circle(double x, double y, Node node_to_draw)
+        {
+            if(mycanvas == null)
+            {
+                Console.WriteLine("ERROR: myCanvas is null");
+                updater.update_log("ERROR: myCanvas is null");
+                return;
+            }
+            
+            
+            Ellipse cur_ellipse = new Ellipse();
+            mycanvas.Children.Add(cur_ellipse);
+            if(node_to_draw.bias)
+            {
+                cur_ellipse.Fill = Brushes.Yellow;
+            } else if(node_to_draw.output)
+            {
+                cur_ellipse.Fill = Brushes.Red;
+            } else if(node_to_draw.input)
+            {
+                cur_ellipse.Fill = Brushes.Blue;
+            } else
+            {
+                cur_ellipse.Fill = Brushes.Black;
+            }
+            cur_ellipse.StrokeThickness = 1;
+            cur_ellipse.Stroke = Brushes.Black;
+            cur_ellipse.Height = 20;
+            cur_ellipse.Width = 20;
+            Canvas.SetTop(cur_ellipse,y);
+            Canvas.SetLeft(cur_ellipse, x);
+            ellipses.Add(cur_ellipse);
+            ellipses_int_list.Add(node_to_draw.id);
         }
     }
 }

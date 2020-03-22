@@ -11,7 +11,7 @@ namespace Genetischer_algo_test_1
         public int population_size;
         public int best_fittness = 0;
         public bool running = false;
-        public int inputs = 2, outputs = 1;
+        public int inputs = 10, outputs = 8;
         public Net_Drawer drawer;
         public Log_Updater updater;
         public List<Neural_Network> neural_networks = new List<Neural_Network>();
@@ -36,6 +36,16 @@ namespace Genetischer_algo_test_1
                 updater.update_log(String.Format("Creating net: {0}", i));
                 neural_networks.Add(new Neural_Network(i, inputs, outputs));
             }
+
+            if(pop_size == 1)
+            {
+                drawer.draw_net(neural_networks[0]);
+            }
+        }
+
+        public void remove_display()
+        {
+            drawer.remove_all_net_elements();
         }
 
         public void fittness_function()

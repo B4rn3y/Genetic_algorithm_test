@@ -8,7 +8,7 @@ namespace Genetischer_algo_test_1
 {
     class Node
     {
-        int nn_id, id;
+        public int nn_id, id;
         public bool input;
         public bool output;
         public bool bias;

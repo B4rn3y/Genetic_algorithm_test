@@ -54,7 +54,9 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
+        <Canvas Grid.Column="4" Grid.ColumnSpan="16" Grid.RowSpan="16" x:Name="canvas_draw" Loaded="Canvas_draw_Loaded">
+            
+        </Canvas>
         <StackPanel Grid.Column="0" Grid.ColumnSpan="4" MinWidth="253" MaxWidth="254" Grid.Row="0" Grid.RowSpan="16" Background="#1C1C1C" Margin="0,0,0,0" x:Name="Stackpanel_w_controls" >
             <Button Background="#1C1C1C"  Foreground="orange" BorderBrush="#1C1C1C" FontSize="25" FontFamily="Century Gothic" FontWeight="Bold" Height="50" x:Name="BTN_start_stop" Click="start_stop_neat">Start</Button>
             <Grid>
@@ -64,12 +66,20 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Grid.ColumnSpan="1" FontWeight="Bold" Margin="0,0,0,0" FontSize="15" TextAlignment="left" Foreground="orange" FontFamily="Century Gothic" ><Run Text="Population Size:"/></TextBlock>
-                <TextBox Grid.Column="1" Grid.ColumnSpan="1" x:Name="TextBox_set_pop_size" Margin="10,0,0,0" FontSize="15" Background="#6E6E6E" FontFamily="Century Gothic" Height="20" Text="100" />
+                <TextBox Grid.Column="1" Grid.ColumnSpan="1" x:Name="TextBox_set_pop_size" Margin="10,0,0,0" FontSize="15" Background="#6E6E6E" FontFamily="Century Gothic" Height="20" Text="1" />
             </Grid>
             <TextBlock FontWeight="Bold" Margin="0,5,0,0" FontSize="15" TextAlignment="left" Foreground="orange" FontFamily="Century Gothic" ><Run Text="Log:"/></TextBlock>
             <TextBox IsReadOnly="true" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" x:Name="Textbox_log_display" Margin="0,1,0,0" Background="#6E6E6E" FontFamily="Century Gothic" Height="154"></TextBox>
 
         </StackPanel>
         <TextBlock x:Name="textblock_show_error_messages" Grid.Row="14" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="4" FontWeight="Bold" Margin="0,0,0,0" FontSize="20" TextAlignment="Left" Foreground="orange" FontFamily="Century Gothic" ></TextBlock>
+        <Grid Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="16" Grid.RowSpan="16" x:Name="net_grid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+        </Grid>
     </Grid>
 </Window>

@@ -196,7 +196,7 @@ namespace Genetischer_algo_test_1
             {
                 for(int k = 0; k < output_nodes.Count; k++)
                 {
-                    nn_connections.Add(new Connection(input_nodes[i],output_nodes[k],minimum,maximum));
+                    nn_connections.Add(new Connection(input_nodes[i],output_nodes[k],minimum,maximum,k));
                 }
             }
         }
@@ -331,10 +331,10 @@ namespace Genetischer_algo_test_1
             // create the new Node and the 2 new connections of it
             Node new_node = new Node(id, nn_nodes.Count - 1, false, false, false, true, connection_start_node.layer);
             nn_nodes.Add(new_node);
-            Connection to_connection = new Connection(connection_start_node, new_node, minimum, maximum);
+            Connection to_connection = new Connection(connection_start_node, new_node, minimum, maximum, id);
             to_connection.weight = 1;
             nn_connections.Add(to_connection);
-            Connection from_connection = new Connection(new_node, connection_end_node, minimum, maximum);
+            Connection from_connection = new Connection(new_node, connection_end_node, minimum, maximum, id+2);
             from_connection.disabled = connection_disabled;
             from_connection.weight = connection_weight;
             nn_connections.Add(from_connection);
@@ -375,7 +375,7 @@ namespace Genetischer_algo_test_1
                             // if it doesnt exist add the Connection to the possible connections list
                             if (new_connection)
                             {
-                                possible_connections.Add(new Connection(cur_start_node, cur_end_node, minimum, maximum));
+                                possible_connections.Add(new Connection(cur_start_node, cur_end_node, minimum, maximum, k));
                             }
                         }
                     }
