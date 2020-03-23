@@ -127,5 +127,55 @@ namespace Genetischer_algo_test_1
             }
             */
         }
+
+        private void BTN_start_Node_mutation_Click(object sender, RoutedEventArgs e)
+        {
+            if(!(managment.running))
+            {
+                return;
+            }
+            managment.best_net.add_node();
+            managment.redraw_net();
+        }
+
+        private void BTN_add_connection_mutation_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(managment.running))
+            {
+                return;
+            }
+            managment.best_net.add_connection();
+            managment.redraw_net();
+        }
+
+        private void BTN_enable_disable_connection_mutation_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(managment.running))
+            {
+                return;
+            }
+            managment.best_net.enable_disable_connection();
+            managment.redraw_net();
+        }
+
+        private void BTN_connection_weight_mutation_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(managment.running))
+            {
+                return;
+            }
+            managment.best_net.mutate_connection_weight_random();
+            managment.redraw_net();
+        }
+
+        private void BTN_shift_connection_weight_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(managment.running))
+            {
+                return;
+            }
+            managment.best_net.mutate_weight_shift();
+            managment.redraw_net();
+        }
     }
 }

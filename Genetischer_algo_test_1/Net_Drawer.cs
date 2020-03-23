@@ -20,16 +20,19 @@ namespace Genetischer_algo_test_1
         public List<Ellipse> ellipses = new List<Ellipse>();
         public List<int> ellipses_int_list = new List<int>();
         public List<Line> lines = new List<Line>();
+        public List<TextBlock> node_id_elements = new List<TextBlock>();
         public Neural_Network cur_net;
 
         public void draw_net(Neural_Network net)
         {
             cur_net = net;
+            /*
             // delete every ellipse drawn on the screen
             for(int k = 0; k<ellipses.Count; k++)
             {
                 mycanvas.Children.Remove(ellipses[k]);
-            }
+            }*/
+            remove_all_net_elements();
 
             double layer_distance = mycanvas.ActualWidth / (net.layers + 1);
 
@@ -71,10 +74,16 @@ namespace Genetischer_algo_test_1
             {
                 mycanvas.Children.Remove(lines[i]);
             }
+            // delete existing textbklocks
+            for (int i = 0; i < node_id_elements.Count; i++)
+            {
+                mycanvas.Children.Remove(node_id_elements[i]);
+            }
             // delete vars
             ellipses = new List<Ellipse>();
             lines = new List<Line>();
             ellipses_int_list = new List<int>();
+            node_id_elements = new List<TextBlock>();
         }
 
 
@@ -187,13 +196,26 @@ namespace Genetischer_algo_test_1
                 updater.update_log("ERROR: myCanvas is null");
                 return;
             }
-            
-            
+
+            TextBlock text = new TextBlock();
+            text.Text = String.Format("{0}",node_to_draw.id);
+            TextBlock.SetForeground(text, Brushes.Orange);
+            Canvas.SetTop(text,y+2);
+            if(node_to_draw.id >= 10)
+            {
+                Canvas.SetLeft(text, x + 3);
+            }
+            else
+            {
+                Canvas.SetLeft(text, x + 7);
+            }
+            node_id_elements.Add(text);
+
             Ellipse cur_ellipse = new Ellipse();
             mycanvas.Children.Add(cur_ellipse);
             if(node_to_draw.bias)
             {
-                cur_ellipse.Fill = Brushes.Yellow;
+                cur_ellipse.Fill = Brushes.Green;
             } else if(node_to_draw.output)
             {
                 cur_ellipse.Fill = Brushes.Red;
@@ -212,6 +234,8 @@ namespace Genetischer_algo_test_1
             Canvas.SetLeft(cur_ellipse, x);
             ellipses.Add(cur_ellipse);
             ellipses_int_list.Add(node_to_draw.id);
+
+            mycanvas.Children.Add(text);
         }
     }
 }
