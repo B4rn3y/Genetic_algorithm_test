@@ -58,9 +58,26 @@ namespace Genetischer_algo_test_1
             }
 
             draw_lines();
+            draw_elements();
         }
 
+        public void draw_elements()
+        {
+            for(int i = 0; i<lines.Count; i++)
+            {
+                mycanvas.Children.Add(lines[i]);
+            }
 
+            for (int i = 0; i < ellipses.Count; i++)
+            {
+                mycanvas.Children.Add(ellipses[i]);
+            }
+
+            for (int i = 0; i < node_id_elements.Count; i++)
+            {
+                mycanvas.Children.Add(node_id_elements[i]);
+            }
+        }
 
         public void remove_all_net_elements()
         {
@@ -158,7 +175,7 @@ namespace Genetischer_algo_test_1
                                 double end_ellipse_y = Canvas.GetTop(ellipses[a])+10;
 
                                 Line cur_line = new Line();
-                                mycanvas.Children.Add(cur_line);
+                                //mycanvas.Children.Add(cur_line);
                                 lines.Add(cur_line);
 
                                 cur_line.StrokeThickness = 2;
@@ -212,7 +229,7 @@ namespace Genetischer_algo_test_1
             node_id_elements.Add(text);
 
             Ellipse cur_ellipse = new Ellipse();
-            mycanvas.Children.Add(cur_ellipse);
+            //mycanvas.Children.Add(cur_ellipse);
             if(node_to_draw.bias)
             {
                 cur_ellipse.Fill = Brushes.Green;
@@ -235,7 +252,7 @@ namespace Genetischer_algo_test_1
             ellipses.Add(cur_ellipse);
             ellipses_int_list.Add(node_to_draw.id);
 
-            mycanvas.Children.Add(text);
+            //mycanvas.Children.Add(text);
         }
     }
 }

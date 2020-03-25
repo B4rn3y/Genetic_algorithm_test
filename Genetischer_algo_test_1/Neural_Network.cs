@@ -8,7 +8,7 @@ namespace Genetischer_algo_test_1
 {
     class Neural_Network
     {
-        int id, species_id, inputs, outputs;
+        public int id, species_id, inputs, outputs;
         public int fitness = 0;
         public int layers = 2;
         public int nodes_counter = 0;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,6 +32,7 @@ namespace Genetischer_algo_test_1
         {
             InitializeComponent();
 
+            managment.net_listbox = listbox_nets;
             updater_log.log_box = Textbox_log_display;
             managment.updater = updater_log;
             drawer.updater = updater_log;
@@ -134,7 +136,7 @@ namespace Genetischer_algo_test_1
             {
                 return;
             }
-            managment.best_net.add_node();
+            managment.cur_net.add_node();
             managment.redraw_net();
         }
 
@@ -144,7 +146,7 @@ namespace Genetischer_algo_test_1
             {
                 return;
             }
-            managment.best_net.add_connection();
+            managment.cur_net.add_connection();
             managment.redraw_net();
         }
 
@@ -154,7 +156,7 @@ namespace Genetischer_algo_test_1
             {
                 return;
             }
-            managment.best_net.enable_disable_connection();
+            managment.cur_net.enable_disable_connection();
             managment.redraw_net();
         }
 
@@ -164,7 +166,7 @@ namespace Genetischer_algo_test_1
             {
                 return;
             }
-            managment.best_net.mutate_connection_weight_random();
+            managment.cur_net.mutate_connection_weight_random();
             managment.redraw_net();
         }
 
@@ -174,8 +176,25 @@ namespace Genetischer_algo_test_1
             {
                 return;
             }
-            managment.best_net.mutate_weight_shift();
+            managment.cur_net.mutate_weight_shift();
             managment.redraw_net();
+        }
+
+        private void Listbox_nets_Loaded(object sender, RoutedEventArgs e)
+        {
+           
+        }
+
+        private void Listbox_nets_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ListBox listbox_w_nets = sender as ListBox;
+            
+            if (listbox_w_nets.HasItems)
+            {
+                int net_id = listbox_w_nets.SelectedIndex;
+                updater_log.update_log(String.Format("Net {0} selected", net_id));
+                managment.show_net(net_id);
+            }
         }
     }
 }
