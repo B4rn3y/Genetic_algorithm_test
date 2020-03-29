@@ -25,6 +25,7 @@ namespace Genetischer_algo_test_1
             this.minimum = minimum;
             this.maximum = maximum;
             this.weight = management.getRandomNumber_double(minimum,maximum);
+            this.innovation_number = management.species_manager.get_connection_innovation_id(this);
         }
 
     }

@@ -13,18 +13,28 @@ namespace Genetischer_algo_test_1
         public int population_size;
         public int best_fittness = 0;
         public bool running = false;
-        public int inputs = 10, outputs = 6;
+        public int inputs = 2, outputs = 1;
         public Net_Drawer drawer;
         public Log_Updater updater;
         public Neural_Network best_net;
         public Neural_Network cur_net;
         public ListBox net_listbox;
+        public bool bias_enabled = true;
         public List<Neural_Network> neural_networks = new List<Neural_Network>();
         public static Random random = new Random();
-        
+        public Speciesism species_manager;
+
 
         public NEAT_management(int pop_size)
         {
+            int node_counter = inputs + outputs;
+            if(bias_enabled)
+            {
+                node_counter += 1;
+            }
+
+            species_manager = new Speciesism(node_counter);
+
             this.population_size = pop_size;
             if(pop_size > 0)
             {
@@ -51,7 +61,7 @@ namespace Genetischer_algo_test_1
             {
                 Console.WriteLine(String.Format("Creating net: {0}", i));
                 updater.update_log(String.Format("Creating net: {0}", i));
-                Neural_Network cur_net = new Neural_Network(i, inputs, outputs, this);
+                Neural_Network cur_net = new Neural_Network(i, inputs, outputs, this, bias_enabled);
                 neural_networks.Add(cur_net);
                 ListBoxItem litem = new ListBoxItem();
                 litem.Content = String.Format("Net {0} - Fitness {1}", i, 0);

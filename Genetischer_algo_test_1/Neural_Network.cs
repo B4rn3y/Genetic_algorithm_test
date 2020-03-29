@@ -12,7 +12,7 @@ namespace Genetischer_algo_test_1
         public int fitness = 0;
         public int layers = 2;
         public int nodes_counter = 0;
-        static bool bias_enabled = true; // whether the bias node is enabeld or not
+        public bool bias_enabled; // whether the bias node is enabeld or not
         static double minimum = -2;
         static double maximum = 2;
         public double mutate_weight_random_prob = 0.8;
@@ -27,12 +27,13 @@ namespace Genetischer_algo_test_1
        
 
         // initialize the NN with the right amount of inputs and outputs
-        public Neural_Network(int id, int inputs, int outputs, NEAT_management management)
+        public Neural_Network(int id, int inputs, int outputs, NEAT_management management, bool bias_enabled)
         {
             this.id = id;
             this.inputs = inputs;
             this.outputs = outputs;
             this.management = management;
+            this.bias_enabled = bias_enabled;
             create_network(inputs, outputs, id);
         }
         // calculate the output for the net depending on the input - WIP
@@ -278,10 +279,13 @@ namespace Genetischer_algo_test_1
             Node connection_end_node = connection_node_add.end_node;
             double connection_weight = connection_node_add.weight;
             bool connection_disabled = connection_node_add.disabled;
+            int connection_inno_id = connection_node_add.innovation_number;
             nn_connections.Remove(connection_node_add);
 
+            int Node_inno_id = management.species_manager.get_node_innovation_id(connection_inno_id);
+
             // create the new Node and the 2 new connections of it
-            Node new_node = new Node(id, nn_nodes.Count, false, false, false, true, connection_start_node.layer);
+            Node new_node = new Node(id, nn_nodes.Count, false, false, false, true, connection_start_node.layer, Node_inno_id);
             nn_nodes.Add(new_node);
             Connection to_connection = new Connection(connection_start_node, new_node, minimum, maximum, management);
             to_connection.weight = 1;

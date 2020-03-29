@@ -19,7 +19,7 @@ namespace Genetischer_algo_test_1
         public int innovation_number;
         public double calculated_output;
 
-        public Node(int nn_id, int id, bool input, bool output, bool bias, bool mutated, int layer)
+        public Node(int nn_id, int id, bool input, bool output, bool bias, bool mutated, int layer, int inno_id = -1)
         {
             this.nn_id = nn_id;
             this.id = id;
@@ -28,6 +28,15 @@ namespace Genetischer_algo_test_1
             this.bias = bias;
             this.mutated = mutated;
             this.layer = layer;
+
+            if(!(mutated))
+            {
+                this.innovation_number = id;
+            } else
+            {
+                this.innovation_number = inno_id;
+            }
+            
         }
     }
 }
