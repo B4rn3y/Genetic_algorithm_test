@@ -286,13 +286,25 @@ namespace Genetischer_algo_test_1
 
         public void add_node()
         {
-            Connection connection_node_add = nn_connections[management.getRandomNumber_int(nn_connections.Count)];
+            // only consider connections that r not disabled, this would cause problems down the line otherwise
+            List<Connection> node_addable_connection = new List<Connection>();
+
+            for(int i = 0; i< nn_connections.Count; i++)
+            {
+                if(!(nn_connections[i].disabled))
+                {
+                    node_addable_connection.Add(nn_connections[i]);
+                }
+            }
+
+            Connection connection_node_add = node_addable_connection[management.getRandomNumber_int(node_addable_connection.Count)];
             Node connection_start_node = connection_node_add.start_node;
             Node connection_end_node = connection_node_add.end_node;
             double connection_weight = connection_node_add.weight;
             bool connection_disabled = connection_node_add.disabled;
             int connection_inno_id = connection_node_add.innovation_number;
-            nn_connections.Remove(connection_node_add);
+            //nn_connections.Remove(connection_node_add); dont remove connection, just disable it
+            connection_node_add.disabled = true;
 
             int Node_inno_id = management.species_manager.get_node_innovation_id(connection_inno_id);
 

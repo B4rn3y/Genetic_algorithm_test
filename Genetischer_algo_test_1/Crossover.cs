@@ -24,7 +24,6 @@ namespace Genetischer_algo_test_1
 
             List<Connection> connections_resulting = new List<Connection>();
             HashSet<int> common_connections = new HashSet<int>();
-            List<Connection> common_connections_final = new List<Connection>();
             List<int> disjoints_parent_1 = new List<int>();
             List<int> excess_parent_1 = new List<int>();
             List<int> disjoints_parent_2 = new List<int>();

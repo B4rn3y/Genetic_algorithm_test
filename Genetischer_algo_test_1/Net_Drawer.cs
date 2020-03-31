@@ -174,59 +174,62 @@ namespace Genetischer_algo_test_1
                     {
                         // save the id we r currently looking for
                         Connection cur_connection = connections[i];
-                        int node_id_to_look_for = cur_connection.end_node.id;
-                        // loop through every drawn ellipse and compare it to our id
-                        for(int a = 0; a<ellipses_int_list.Count; a++)
-                        {
-                            // if id matches draw the line
-                            if(node_id_to_look_for == ellipses_int_list[a])
+                        if(!(cur_connection.disabled))
+                        { 
+                            int node_id_to_look_for = cur_connection.end_node.id;
+                            // loop through every drawn ellipse and compare it to our id
+                            for(int a = 0; a<ellipses_int_list.Count; a++)
                             {
-                                double start_ellipse_x = Canvas.GetLeft(cur_ellipse)+20;
-                                double start_ellipse_y = Canvas.GetTop(cur_ellipse)+10;
-
-                                double end_ellipse_x = Canvas.GetLeft(ellipses[a]);
-                                double end_ellipse_y = Canvas.GetTop(ellipses[a])+10;
-
-                                Line cur_line = new Line();
-                                //mycanvas.Children.Add(cur_line);
-                                lines.Add(cur_line);
-
-                                cur_line.StrokeThickness = 2;
-
-                                if(cur_connection.disabled)
+                                // if id matches draw the line
+                                if(node_id_to_look_for == ellipses_int_list[a])
                                 {
-                                    cur_line.Stroke = Brushes.Yellow;
-                                } else if(cur_connection.weight > 0)
-                                {
-                                    cur_line.Stroke = Brushes.Red;
-                                } else if(cur_connection.weight < 0)
-                                {
-                                    cur_line.Stroke = Brushes.Blue;
-                                } else
-                                {
-                                    cur_line.Stroke = Brushes.Black;
+                                    double start_ellipse_x = Canvas.GetLeft(cur_ellipse)+20;
+                                    double start_ellipse_y = Canvas.GetTop(cur_ellipse)+10;
+
+                                    double end_ellipse_x = Canvas.GetLeft(ellipses[a]);
+                                    double end_ellipse_y = Canvas.GetTop(ellipses[a])+10;
+
+                                    Line cur_line = new Line();
+                                    //mycanvas.Children.Add(cur_line);
+                                    lines.Add(cur_line);
+
+                                    cur_line.StrokeThickness = 2;
+
+                                    if(cur_connection.disabled)
+                                    {
+                                        cur_line.Stroke = Brushes.Yellow;
+                                    } else if(cur_connection.weight > 0)
+                                    {
+                                        cur_line.Stroke = Brushes.Red;
+                                    } else if(cur_connection.weight < 0)
+                                    {
+                                        cur_line.Stroke = Brushes.Blue;
+                                    } else
+                                    {
+                                        cur_line.Stroke = Brushes.Black;
+                                    }
+                                    cur_line.X1 = start_ellipse_x; 
+                                    cur_line.Y1 = start_ellipse_y; 
+
+                                    cur_line.X2 = end_ellipse_x; 
+                                    cur_line.Y2 = end_ellipse_y; 
+
+
+                                    //Console.WriteLine(String.Format("{0}", start_ellipse_x));
+                                    //Console.WriteLine(String.Format("{0}", end_ellipse_x));
+                                    //Console.WriteLine(String.Format("{0}", start_ellipse_y));
+                                    //Console.WriteLine(String.Format("{0}", end_ellipse_y));
+
+                                    start_ellipse_x -= 20;
+                                    start_ellipse_y -= 10;
+                                    end_ellipse_y -= 10;
+                                    TextBlock text = new TextBlock();
+                                    text.Text = String.Format("{0}", connections[i].innovation_number);
+                                    TextBlock.SetForeground(text, Brushes.Green);
+                                    Canvas.SetTop(text, start_ellipse_y + ((end_ellipse_y - start_ellipse_y) /2));
+                                    Canvas.SetLeft(text, start_ellipse_x + ((end_ellipse_x - start_ellipse_x) / 2));
+                                    connection_id_element.Add(text);
                                 }
-                                cur_line.X1 = start_ellipse_x; 
-                                cur_line.Y1 = start_ellipse_y; 
-
-                                cur_line.X2 = end_ellipse_x; 
-                                cur_line.Y2 = end_ellipse_y; 
-
-
-                                //Console.WriteLine(String.Format("{0}", start_ellipse_x));
-                                //Console.WriteLine(String.Format("{0}", end_ellipse_x));
-                                //Console.WriteLine(String.Format("{0}", start_ellipse_y));
-                                //Console.WriteLine(String.Format("{0}", end_ellipse_y));
-
-                                start_ellipse_x -= 20;
-                                start_ellipse_y -= 10;
-                                end_ellipse_y -= 10;
-                                TextBlock text = new TextBlock();
-                                text.Text = String.Format("{0}", connections[i].innovation_number);
-                                TextBlock.SetForeground(text, Brushes.Green);
-                                Canvas.SetTop(text, start_ellipse_y + ((end_ellipse_y - start_ellipse_y) /2));
-                                Canvas.SetLeft(text, start_ellipse_x + ((end_ellipse_x - start_ellipse_x) / 2));
-                                connection_id_element.Add(text);
                             }
                         }
                     }
