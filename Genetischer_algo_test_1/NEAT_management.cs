@@ -23,6 +23,7 @@ namespace Genetischer_algo_test_1
         public List<Neural_Network> neural_networks = new List<Neural_Network>();
         public static Random random = new Random();
         public Speciesism species_manager;
+        public Crossover crossover_nets;
 
 
         public NEAT_management(int pop_size)
@@ -34,6 +35,7 @@ namespace Genetischer_algo_test_1
             }
 
             species_manager = new Speciesism(node_counter);
+            crossover_nets = new Crossover(this);
 
             this.population_size = pop_size;
             if(pop_size > 0)
@@ -66,6 +68,25 @@ namespace Genetischer_algo_test_1
                 ListBoxItem litem = new ListBoxItem();
                 litem.Content = String.Format("Net {0} - Fitness {1}", i, 0);
                 
+                litem.Tag = i;
+                net_listbox.Items.Add(litem);
+                if (i == 0)
+                {
+                    litem.IsSelected = true;
+                }
+            }
+        }
+
+        public void refresh_listbox()
+        {
+            drawer.remove_all_net_elements();
+            net_listbox.Items.Clear();
+
+            for (int i = 0; i < neural_networks.Count; i++)
+            { 
+                ListBoxItem litem = new ListBoxItem();
+                litem.Content = String.Format("Net {0} - Fitness {1}", i, neural_networks[i].fitness);
+
                 litem.Tag = i;
                 net_listbox.Items.Add(litem);
                 if (i == 0)

@@ -13,28 +13,27 @@ namespace Genetischer_algo_test_1
         public int layers = 2;
         public int nodes_counter = 0;
         public bool bias_enabled; // whether the bias node is enabeld or not
-        static double minimum = -2;
-        static double maximum = 2;
-        public double mutate_weight_random_prob = 0.8;
-        public double mutate_weight_shift_prob = 0.3;
-        public double mutate_connection_prob = 0.05;
-        public double mutate_node_prob = 0.01;
-        public double mutate_enable_disable_connection = 0.025;
-        public double mutate_remove_node_prob = 0.005;
+        public double minimum = -2;
+        public double maximum = 2;
+        public int mutate_weight_random_prob = 80;
+        public int mutate_weight_shift_prob = 30;
+        public int mutate_connection_prob = 5;
+        public int mutate_node_prob = 1;
+        public int mutate_enable_disable_connection = 3;
         public List<Node> nn_nodes = new List<Node>();
         public List<Connection> nn_connections = new List<Connection>();
         public NEAT_management management;
        
 
         // initialize the NN with the right amount of inputs and outputs
-        public Neural_Network(int id, int inputs, int outputs, NEAT_management management, bool bias_enabled)
+        public Neural_Network(int id, int inputs, int outputs, NEAT_management management, bool bias_enabled, bool crossover = false)
         {
             this.id = id;
             this.inputs = inputs;
             this.outputs = outputs;
             this.management = management;
             this.bias_enabled = bias_enabled;
-            create_network(inputs, outputs, id);
+            create_network(inputs, outputs, id, crossover);
         }
         // calculate the output for the net depending on the input - WIP
         public List<double> get_output(List<double> the_inputs)
@@ -162,7 +161,7 @@ namespace Genetischer_algo_test_1
         }
 
         // create the nework starting with the minimun Nodes needed for it (Input and Output Nodes + bias) + the Connections
-        void create_network(int inputs, int outputs, int id)
+        void create_network(int inputs, int outputs, int id, bool crossover)
         {
             List<Node> input_nodes = new List<Node>();
             List<Node> output_nodes = new List<Node>();
@@ -177,10 +176,20 @@ namespace Genetischer_algo_test_1
 
             for (int i = 0; i < outputs; i++)
             {
-                Node output_node = new Node(id, nodes_counter, false, true, false, false, 1);
-                this.nn_nodes.Add(output_node);
-                output_nodes.Add(output_node);
-                nodes_counter++;
+                if(crossover)
+                {
+                    Node output_node = new Node(id, nodes_counter, false, true, false, false, 2);
+                    this.nn_nodes.Add(output_node);
+                    output_nodes.Add(output_node);
+                    nodes_counter++;
+                }
+                else
+                {
+                    Node output_node = new Node(id, nodes_counter, false, true, false, false, 1);
+                    this.nn_nodes.Add(output_node);
+                    output_nodes.Add(output_node);
+                    nodes_counter++;
+                }
             }
 
             if (bias_enabled)
@@ -195,11 +204,14 @@ namespace Genetischer_algo_test_1
                 nodes_counter--;
             }
             // create connections from every input node to every output node
-            for (int i = 0; i < input_nodes.Count; i++)
+            if(!(crossover))
             {
-                for(int k = 0; k < output_nodes.Count; k++)
+                for (int i = 0; i < input_nodes.Count; i++)
                 {
-                    nn_connections.Add(new Connection(input_nodes[i],output_nodes[k],minimum,maximum, management));
+                    for(int k = 0; k < output_nodes.Count; k++)
+                    {
+                        nn_connections.Add(new Connection(input_nodes[i],output_nodes[k],minimum,maximum, management));
+                    }
                 }
             }
         }
@@ -208,33 +220,33 @@ namespace Genetischer_algo_test_1
         void check_mutations()
         {
             // add a new connection to the net - cur. 5%
-            if (GetRandomNumber(0, 1) <= this.mutate_connection_prob)
+            if (management.getRandomNumber_int(100) <= this.mutate_connection_prob)
             {
                 add_connection();
             }
             // mutate weight - cur. 80%
-            if (GetRandomNumber(0, 1) <= this.mutate_weight_random_prob && nn_connections.Count > 0)
+            if (management.getRandomNumber_int(100) <= this.mutate_weight_random_prob)
             {
                 mutate_connection_weight_random();
             }
             // add new node - cur. 1%
-            if (GetRandomNumber(0, 1) <= this.mutate_node_prob)
+            if (management.getRandomNumber_int(100) <= this.mutate_node_prob)
             {
                 add_node();
             }
             // enable_disable_connection - cur. 2.5%
-            if (GetRandomNumber(0, 1) <= this.mutate_enable_disable_connection && nn_connections.Count > 0)
+            if (management.getRandomNumber_int(100) <= this.mutate_enable_disable_connection)
             {
                 enable_disable_connection();
             }
             // mutate the weight of a connection by dividing it - cur. 30%
-            if (GetRandomNumber(0, 1) <= this.mutate_weight_shift_prob)
+            if (management.getRandomNumber_int(100) <= this.mutate_weight_shift_prob)
             {
                 mutate_weight_shift();
             }
         }
         // checks whether some nodes that are connected sit on the same layer(what they shouldnt); if it finds something like this it takes action by incrementing the layer of the end node. This does it as long as its needed for the net to be in order again
-        void check_net_nature()
+        public void check_net_nature()
         {
             while (true)
             {

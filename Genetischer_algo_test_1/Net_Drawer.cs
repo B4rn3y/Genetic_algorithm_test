@@ -22,6 +22,7 @@ namespace Genetischer_algo_test_1
         public List<Line> lines = new List<Line>();
         public List<TextBlock> node_id_elements = new List<TextBlock>();
         public Neural_Network cur_net;
+        public List<TextBlock> connection_id_element = new List<TextBlock>();
 
         public void draw_net(Neural_Network net)
         {
@@ -77,6 +78,12 @@ namespace Genetischer_algo_test_1
             {
                 mycanvas.Children.Add(node_id_elements[i]);
             }
+
+            for (int i = 0; i < connection_id_element.Count; i++)
+            {
+                mycanvas.Children.Add(connection_id_element[i]);
+            }
+            
         }
 
         public void remove_all_net_elements()
@@ -96,11 +103,17 @@ namespace Genetischer_algo_test_1
             {
                 mycanvas.Children.Remove(node_id_elements[i]);
             }
+            // delete textblocks of connections
+            for (int i = 0; i < connection_id_element.Count; i++)
+            {
+                mycanvas.Children.Remove(connection_id_element[i]);
+            }
             // delete vars
             ellipses = new List<Ellipse>();
             lines = new List<Line>();
             ellipses_int_list = new List<int>();
             node_id_elements = new List<TextBlock>();
+            connection_id_element = new List<TextBlock>();
         }
 
 
@@ -193,11 +206,27 @@ namespace Genetischer_algo_test_1
                                 {
                                     cur_line.Stroke = Brushes.Black;
                                 }
-                                cur_line.X1 = start_ellipse_x;
-                                cur_line.Y1 = start_ellipse_y;
+                                cur_line.X1 = start_ellipse_x; 
+                                cur_line.Y1 = start_ellipse_y; 
 
-                                cur_line.X2 = end_ellipse_x;
-                                cur_line.Y2 = end_ellipse_y;
+                                cur_line.X2 = end_ellipse_x; 
+                                cur_line.Y2 = end_ellipse_y; 
+
+
+                                //Console.WriteLine(String.Format("{0}", start_ellipse_x));
+                                //Console.WriteLine(String.Format("{0}", end_ellipse_x));
+                                //Console.WriteLine(String.Format("{0}", start_ellipse_y));
+                                //Console.WriteLine(String.Format("{0}", end_ellipse_y));
+
+                                start_ellipse_x -= 20;
+                                start_ellipse_y -= 10;
+                                end_ellipse_y -= 10;
+                                TextBlock text = new TextBlock();
+                                text.Text = String.Format("{0}", connections[i].innovation_number);
+                                TextBlock.SetForeground(text, Brushes.Green);
+                                Canvas.SetTop(text, start_ellipse_y + ((end_ellipse_y - start_ellipse_y) /2));
+                                Canvas.SetLeft(text, start_ellipse_x + ((end_ellipse_x - start_ellipse_x) / 2));
+                                connection_id_element.Add(text);
                             }
                         }
                     }
@@ -215,7 +244,7 @@ namespace Genetischer_algo_test_1
             }
 
             TextBlock text = new TextBlock();
-            text.Text = String.Format("{0}",node_to_draw.id);
+            text.Text = String.Format("{0}",node_to_draw.innovation_number);
             TextBlock.SetForeground(text, Brushes.Orange);
             Canvas.SetTop(text,y+2);
             if(node_to_draw.id >= 10)

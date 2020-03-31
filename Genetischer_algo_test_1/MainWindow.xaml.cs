@@ -47,7 +47,7 @@ namespace Genetischer_algo_test_1
         internal double Window_width { get => window_width; set => window_width = value; }
         internal double Stackpanel_width { get => stackpanel_width; set => stackpanel_width = value; }
 
-        private async void start_stop_neat(object sender, RoutedEventArgs e)
+        private void start_stop_neat(object sender, RoutedEventArgs e)
         {
             // reset any error msg
             textblock_show_error_messages.Text = "";
@@ -55,6 +55,24 @@ namespace Genetischer_algo_test_1
             if (Managment.running)
             {
                 Managment.running = false;
+
+                int node_counter = managment.inputs + managment.outputs;
+                if(managment.bias_enabled)
+                {
+                    node_counter += 1;
+                }
+
+                //List<int[]> Connection_nodes = new List<int[]>();
+                List<int> Parent_connection_id_node = new List<int>();
+
+                for(int i = 0; i<node_counter; i++)
+                {
+                    //Connection_nodes.Add(managment.species_manager.Connection_nodes[i]);
+                    Parent_connection_id_node.Add(managment.species_manager.Parent_connection_id_node[i]);
+                }
+
+                Managment.species_manager.Connection_nodes = new List<int[]>();
+                Managment.species_manager.Parent_connection_id_node = Parent_connection_id_node;
                 BTN_start_stop.Content = "Start";
                 Console.WriteLine("NEAT Stopped");
                 updater_log.update_log("NEAT Stopped");
@@ -76,10 +94,8 @@ namespace Genetischer_algo_test_1
 
                 if (exit)
                 {
-                    textblock_show_error_messages.Text = "ERROR: Please enter a " + Environment.NewLine + "valid integer!";
                     updater_log.update_log("ERROR: Please enter a valid integer!");
-                    await Task.Delay(30000);
-                    textblock_show_error_messages.Text = "";
+                    return;
                 }
                 int pop_size = int.Parse(TextBox_set_pop_size.Text);
                 Console.WriteLine(String.Format("NEAT Started: Population Size: {0}", pop_size));
@@ -96,10 +112,7 @@ namespace Genetischer_algo_test_1
             else
             {
                 Managment.running = false;
-                textblock_show_error_messages.Text = "ERROR: No Population Size has" + Environment.NewLine + "been entered!";
                 updater_log.update_log("ERROR: No Population Size has been entered!");
-                await Task.Delay(30000);
-                textblock_show_error_messages.Text = "";
             }
         }
 
@@ -170,13 +183,15 @@ namespace Genetischer_algo_test_1
             managment.redraw_net();
         }
 
-        private void BTN_shift_connection_weight_Click(object sender, RoutedEventArgs e)
+        private void BTN_crossover_nets_Click(object sender, RoutedEventArgs e)
         {
-            if (!(managment.running))
+            if (!(managment.running) || managment.neural_networks.Count < 2)
             {
                 return;
             }
-            managment.cur_net.mutate_weight_shift();
+            managment.neural_networks[0].fitness = 100;
+            managment.neural_networks.Add( managment.crossover_nets.get_crossover(managment.neural_networks[0], managment.neural_networks[1]));
+            managment.refresh_listbox();
             managment.redraw_net();
         }
 

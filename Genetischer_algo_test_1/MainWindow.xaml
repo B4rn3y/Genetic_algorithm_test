@@ -76,7 +76,7 @@
             <Button Background="#1C1C1C"  Foreground="orange" BorderBrush="#1C1C1C" FontSize="25" FontFamily="Century Gothic" FontWeight="Bold" Height="50" x:Name="BTN_add_connection_mutation" Click="BTN_add_connection_mutation_Click">M. add Connection</Button>
             <Button Background="#1C1C1C"  Foreground="orange" BorderBrush="#1C1C1C" FontSize="25" FontFamily="Century Gothic" FontWeight="Bold" Height="50" x:Name="BTN_enable_disable_connection_mutation" Click="BTN_enable_disable_connection_mutation_Click">M. e/d Connection</Button>
             <Button Background="#1C1C1C"  Foreground="orange" BorderBrush="#1C1C1C" FontSize="25" FontFamily="Century Gothic" FontWeight="Bold" Height="50" x:Name="BTN_connection_weight_mutation" Click="BTN_connection_weight_mutation_Click">M. Connection W.</Button>
-            <Button Background="#1C1C1C"  Foreground="orange" BorderBrush="#1C1C1C" FontSize="25" FontFamily="Century Gothic" FontWeight="Bold" Height="50" x:Name="BTN_shift_connection_weight" Click="BTN_shift_connection_weight_Click">M. Connection Shift</Button>
+            <Button Background="#1C1C1C"  Foreground="orange" BorderBrush="#1C1C1C" FontSize="25" FontFamily="Century Gothic" FontWeight="Bold" Height="50" x:Name="BTN_crossover_nets" Click="BTN_crossover_nets_Click">Crossover first 2 nets</Button>
             <TextBlock FontWeight="Bold" Margin="0,5,0,0" FontSize="15" TextAlignment="left" Foreground="orange" FontFamily="Century Gothic" ><Run Text="Log:"/></TextBlock>
             <TextBox IsReadOnly="true" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" x:Name="Textbox_log_display" Margin="0,1,0,0" Background="#6E6E6E" FontFamily="Century Gothic" Height="154"></TextBox>
         </StackPanel>
