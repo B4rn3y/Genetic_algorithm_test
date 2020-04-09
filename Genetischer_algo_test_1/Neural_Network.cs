@@ -8,7 +8,7 @@ namespace Genetischer_algo_test_1
 {
     class Neural_Network
     {
-        public int id, species_id, inputs, outputs;
+        public int id, inputs, outputs;
         public int fitness = 0;
         public int layers = 2;
         public int nodes_counter = 0;
@@ -17,12 +17,14 @@ namespace Genetischer_algo_test_1
         public double maximum = 2;
         public int mutate_weight_random_prob = 80;
         public int mutate_weight_shift_prob = 30;
-        public int mutate_connection_prob = 5;
-        public int mutate_node_prob = 1;
-        public int mutate_enable_disable_connection = 3;
+        public double mutate_connection_prob = 0.05;
+        public double mutate_node_prob = 0.03;
+        public double mutate_remove_node = 0.02;
+        public double mutate_enable_disable_connection = 0.05;
         public List<Node> nn_nodes = new List<Node>();
         public List<Connection> nn_connections = new List<Connection>();
         public NEAT_management management;
+        public Species species;
        
 
         // initialize the NN with the right amount of inputs and outputs
@@ -126,6 +128,8 @@ namespace Genetischer_algo_test_1
                                 cur_node.value += cur_connection.value;
                             }
                         }
+
+                        cur_node.value = Sigmoid(cur_node.value); // use sigmoid funcion on every output and mutated node
                     }
                     // Calculate the values of all Connections going to upper layers from this layer out
                     for(int g = 0; g<leading_connection.Count; g++)
@@ -217,30 +221,35 @@ namespace Genetischer_algo_test_1
         }
 
         // checks if to mutate the neural network
-        void check_mutations()
+        public void check_mutations()
         {
             // add a new connection to the net - cur. 5%
-            if (management.getRandomNumber_int(100) <= this.mutate_connection_prob)
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_connection_prob)
             {
                 add_connection();
             }
             // mutate weight - cur. 80%
-            if (management.getRandomNumber_int(100) <= this.mutate_weight_random_prob)
+            if (management.getRandomNumber_double(0,100) <= this.mutate_weight_random_prob)
             {
                 mutate_connection_weight_random();
             }
             // add new node - cur. 1%
-            if (management.getRandomNumber_int(100) <= this.mutate_node_prob)
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_node_prob)
             {
                 add_node();
             }
+            // remove node - cur. 1%
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_remove_node)
+            {
+                remove_node();
+            }
             // enable_disable_connection - cur. 2.5%
-            if (management.getRandomNumber_int(100) <= this.mutate_enable_disable_connection)
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_enable_disable_connection)
             {
                 enable_disable_connection();
             }
             // mutate the weight of a connection by dividing it - cur. 30%
-            if (management.getRandomNumber_int(100) <= this.mutate_weight_shift_prob)
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_weight_shift_prob)
             {
                 mutate_weight_shift();
             }
@@ -296,30 +305,69 @@ namespace Genetischer_algo_test_1
                     node_addable_connection.Add(nn_connections[i]);
                 }
             }
+            if (node_addable_connection.Count > 0)
+            {
+                Connection connection_node_add = node_addable_connection[management.getRandomNumber_int(node_addable_connection.Count)];
+                Node connection_start_node = connection_node_add.start_node;
+                Node connection_end_node = connection_node_add.end_node;
+                double connection_weight = connection_node_add.weight;
+                bool connection_disabled = connection_node_add.disabled;
+                int connection_inno_id = connection_node_add.innovation_number;
+                //nn_connections.Remove(connection_node_add); dont remove connection, just disable it
+                connection_node_add.disabled = true;
 
-            Connection connection_node_add = node_addable_connection[management.getRandomNumber_int(node_addable_connection.Count)];
-            Node connection_start_node = connection_node_add.start_node;
-            Node connection_end_node = connection_node_add.end_node;
-            double connection_weight = connection_node_add.weight;
-            bool connection_disabled = connection_node_add.disabled;
-            int connection_inno_id = connection_node_add.innovation_number;
-            //nn_connections.Remove(connection_node_add); dont remove connection, just disable it
-            connection_node_add.disabled = true;
+                int Node_inno_id = management.species_manager.get_node_innovation_id(connection_inno_id);
 
-            int Node_inno_id = management.species_manager.get_node_innovation_id(connection_inno_id);
+                // create the new Node and the 2 new connections of it
+                Node new_node = new Node(id, nn_nodes.Count, false, false, false, true, connection_start_node.layer, Node_inno_id);
+                nn_nodes.Add(new_node);
+                Connection to_connection = new Connection(connection_start_node, new_node, minimum, maximum, management);
+                to_connection.weight = 1;
+                nn_connections.Add(to_connection);
+                Connection from_connection = new Connection(new_node, connection_end_node, minimum, maximum, management);
+                from_connection.disabled = connection_disabled;
+                from_connection.weight = connection_weight;
+                nn_connections.Add(from_connection);
+                check_net_nature();
+            }
 
-            // create the new Node and the 2 new connections of it
-            Node new_node = new Node(id, nn_nodes.Count, false, false, false, true, connection_start_node.layer, Node_inno_id);
-            nn_nodes.Add(new_node);
-            Connection to_connection = new Connection(connection_start_node, new_node, minimum, maximum, management);
-            to_connection.weight = 1;
-            nn_connections.Add(to_connection);
-            Connection from_connection = new Connection(new_node, connection_end_node, minimum, maximum, management);
-            from_connection.disabled = connection_disabled;
-            from_connection.weight = connection_weight;
-            nn_connections.Add(from_connection);
-            check_net_nature();
+        }
 
+        public void remove_node()
+        {
+            List<Node> deleteable_nodes = new List<Node>();
+
+            for (int i = 0; i < nn_nodes.Count; i++)
+            {
+                if (nn_nodes[i].mutated)
+                {
+                    deleteable_nodes.Add(nn_nodes[i]);
+                }
+            }
+            if (deleteable_nodes.Count > 0)
+            {
+                Node node_to_delete = deleteable_nodes[management.getRandomNumber_int(deleteable_nodes.Count)];
+                deleteable_nodes.Remove(node_to_delete);
+
+                
+
+                List<Connection> Connections_to_remove = new List<Connection>();
+
+                for (int i = 0; i < nn_connections.Count; i++)
+                {
+                    if (nn_connections[i].start_node == node_to_delete || nn_connections[i].end_node == node_to_delete)
+                    {
+                        Connections_to_remove.Add(nn_connections[i]);
+                    }
+                }
+
+                for (int i = 0; i < Connections_to_remove.Count; i++)
+                {
+                    nn_connections.Remove(Connections_to_remove[i]);
+                }
+
+                nn_nodes.Remove(node_to_delete);
+            }
         }
 
         // adds a new connection to the neural network when mutated especially
@@ -363,7 +411,6 @@ namespace Genetischer_algo_test_1
             }
 
             // select a random Connection from the possible Connection list - only when list is full of course XD
-            Console.WriteLine(String.Format("{0}",possible_connections.Count));
             if (possible_connections.Count > 0)
             {
                 nn_connections.Add(possible_connections[management.getRandomNumber_int(possible_connections.Count)]);
@@ -391,7 +438,7 @@ namespace Genetischer_algo_test_1
             if(nn_connections.Count > 0)
             { 
                 Connection connection_to_mutate = nn_connections[management.getRandomNumber_int(nn_connections.Count)];
-                connection_to_mutate.weight = GetRandomNumber(minimum, maximum);
+                connection_to_mutate.weight = management.getRandomNumber_double(minimum,maximum);
             }
         }
 
@@ -406,12 +453,6 @@ namespace Genetischer_algo_test_1
                     connection_to_mutate.weight = connection_to_mutate.weight / 2;
                 }
             }
-        }
-
-        static double GetRandomNumber(double minimum, double maximum)
-        {
-            Random random = new Random();
-            return random.NextDouble() * (maximum - minimum) + minimum;
         }
 
 

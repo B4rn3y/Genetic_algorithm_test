@@ -21,6 +21,10 @@ namespace Genetischer_algo_test_1
         public List<int> ellipses_int_list = new List<int>();
         public List<Line> lines = new List<Line>();
         public List<TextBlock> node_id_elements = new List<TextBlock>();
+        public TextBlock textblock_species_id_display;
+        public TextBlock textblock_generation;
+        public TextBlock textblock_fittness;
+        public TextBlock textblock_species_pop_size_display;
         public Neural_Network cur_net;
         public List<TextBlock> connection_id_element = new List<TextBlock>();
 
@@ -33,7 +37,12 @@ namespace Genetischer_algo_test_1
             {
                 mycanvas.Children.Remove(ellipses[k]);
             }*/
+
+            textblock_fittness.Text = string.Format("Fittness: {0}",net.fitness);
+            textblock_species_pop_size_display.Text = string.Format("Species pop size: {0}", net.species.population.Count);
+
             remove_all_net_elements();
+            textblock_species_id_display.Text = String.Format("Species: {0}",net.species.id);
 
             double layer_distance = mycanvas.ActualWidth / (net.layers + 1);
 
@@ -84,6 +93,11 @@ namespace Genetischer_algo_test_1
                 mycanvas.Children.Add(connection_id_element[i]);
             }
             
+        }
+
+        public void update_generation_id(int id)
+        {
+            textblock_generation.Text = String.Format("Generation: {0}",id);
         }
 
         public void remove_all_net_elements()

@@ -21,7 +21,7 @@ namespace Genetischer_algo_test_1
     /// </summary>
     public partial class MainWindow : Window
     {
-        private NEAT_management managment = new NEAT_management(0);
+        private NEAT_management managment = new NEAT_management();
         private Net_Drawer drawer = new Net_Drawer();
         private Log_Updater updater_log = new Log_Updater();
         private double window_height;
@@ -31,13 +31,17 @@ namespace Genetischer_algo_test_1
         public MainWindow()
         {
             InitializeComponent();
-
-            managment.net_listbox = listbox_nets;
+            
             updater_log.log_box = Textbox_log_display;
             managment.updater = updater_log;
             drawer.updater = updater_log;
             managment.drawer = drawer;
             drawer.main_grid = net_grid;
+            drawer.textblock_species_id_display = textblock_species_id_display;
+            drawer.textblock_generation = textblock_generation;
+            drawer.textblock_fittness = textblock_fittness;
+            drawer.textblock_species_pop_size_display = textblock_species_pop_size_display;
+            BTN_Next_Generation.IsEnabled = false;
         }
 
         internal NEAT_management Managment { get => managment; set => managment = value; }
@@ -49,36 +53,8 @@ namespace Genetischer_algo_test_1
 
         private void start_stop_neat(object sender, RoutedEventArgs e)
         {
-            // reset any error msg
-            textblock_show_error_messages.Text = "";
-            // check if the management object already runs, if it does stop it
-            if (Managment.running)
-            {
-                Managment.running = false;
-
-                int node_counter = managment.inputs + managment.outputs;
-                if(managment.bias_enabled)
-                {
-                    node_counter += 1;
-                }
-
-                //List<int[]> Connection_nodes = new List<int[]>();
-                List<int> Parent_connection_id_node = new List<int>();
-
-                for(int i = 0; i<node_counter; i++)
-                {
-                    //Connection_nodes.Add(managment.species_manager.Connection_nodes[i]);
-                    Parent_connection_id_node.Add(managment.species_manager.Parent_connection_id_node[i]);
-                }
-
-                Managment.species_manager.Connection_nodes = new List<int[]>();
-                Managment.species_manager.Parent_connection_id_node = Parent_connection_id_node;
-                BTN_start_stop.Content = "Start";
-                Console.WriteLine("NEAT Stopped");
-                updater_log.update_log("NEAT Stopped");
-                Managment.remove_display();
-
-            } else if (!(TextBox_set_pop_size.Text == String.Empty))
+            
+            if (!(TextBox_set_pop_size.Text == String.Empty))
             {
                 bool exit = false;
                 char[] int_chars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -105,15 +81,20 @@ namespace Genetischer_algo_test_1
                 drawer.width = window_width;
                 drawer.height = window_height;
 
-                Managment.running = true;
                 Managment.start_nets(pop_size);
-                BTN_start_stop.Content = "Stop";
+
+                BTN_Next_Generation.IsEnabled = true;
             }
             else
             {
-                Managment.running = false;
                 updater_log.update_log("ERROR: No Population Size has been entered!");
             }
+        }
+
+        private void BTN_Next_Generation_Click(object sender, RoutedEventArgs e)
+        {
+            managment.next_gen();
+            updater_log.update_log(String.Format("Generation {0} was generated.",managment.generation_counter));
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -143,72 +124,56 @@ namespace Genetischer_algo_test_1
             */
         }
 
-        private void BTN_start_Node_mutation_Click(object sender, RoutedEventArgs e)
+        private int _numValue = 0;
+
+        public int NumValue
         {
-            if(!(managment.running))
+            get { return _numValue; }
+            set
+            {
+                _numValue = value;
+                txtNum.Text = value.ToString();
+            }
+        }
+
+        public void NumberUpDown()
+        {
+            InitializeComponent();
+            txtNum.Text = _numValue.ToString();
+        }
+
+        private void cmdUp_Click(object sender, RoutedEventArgs e)
+        {
+            NumValue++;
+        }
+
+        private void cmdDown_Click(object sender, RoutedEventArgs e)
+        {
+            NumValue--;
+        }
+
+        private void txtNum_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (txtNum == null)
             {
                 return;
             }
-            managment.cur_net.add_node();
-            managment.redraw_net();
+
+            if (!int.TryParse(txtNum.Text, out _numValue))
+                txtNum.Text = _numValue.ToString();
         }
 
-        private void BTN_add_connection_mutation_Click(object sender, RoutedEventArgs e)
+        private void BTN_calculate_generations_Click(object sender, RoutedEventArgs e)
         {
-            if (!(managment.running))
+            for(int i = 0; i < _numValue; i++)
             {
-                return;
-            }
-            managment.cur_net.add_connection();
-            managment.redraw_net();
-        }
-
-        private void BTN_enable_disable_connection_mutation_Click(object sender, RoutedEventArgs e)
-        {
-            if (!(managment.running))
-            {
-                return;
-            }
-            managment.cur_net.enable_disable_connection();
-            managment.redraw_net();
-        }
-
-        private void BTN_connection_weight_mutation_Click(object sender, RoutedEventArgs e)
-        {
-            if (!(managment.running))
-            {
-                return;
-            }
-            managment.cur_net.mutate_connection_weight_random();
-            managment.redraw_net();
-        }
-
-        private void BTN_crossover_nets_Click(object sender, RoutedEventArgs e)
-        {
-            if (!(managment.running) || managment.neural_networks.Count < 2)
-            {
-                return;
-            }
-            managment.neural_networks[0].fitness = 100;
-            managment.neural_networks.Add( managment.crossover_nets.get_crossover(managment.neural_networks[0], managment.neural_networks[1]));
-            managment.refresh_listbox();
-            managment.redraw_net();
-        }
-
-        private void Listbox_nets_Loaded(object sender, RoutedEventArgs e)
-        {
-           
-        }
-
-        private void Listbox_nets_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ListBox listbox_w_nets = sender as ListBox;
-            
-            if (listbox_w_nets.HasItems)
-            {
-                int net_id = listbox_w_nets.SelectedIndex;
-                updater_log.update_log(String.Format("Net {0} selected", net_id));
-                managment.show_net(net_id);
+                managment.next_gen();
+                updater_log.update_log(String.Format("Generation {0} was generated.", managment.generation_counter));
+                if(managment.best_fittness >= managment.max_fittness)
+                {
+                    updater_log.update_log("Max Fittness was reached.");
+                    break;
+                }
             }
         }
     }
