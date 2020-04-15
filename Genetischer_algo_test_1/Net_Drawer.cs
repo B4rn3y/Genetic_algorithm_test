@@ -255,8 +255,6 @@ namespace Genetischer_algo_test_1
         {
             if(mycanvas == null)
             {
-                Console.WriteLine("ERROR: myCanvas is null");
-                updater.update_log("ERROR: myCanvas is null");
                 return;
             }
 

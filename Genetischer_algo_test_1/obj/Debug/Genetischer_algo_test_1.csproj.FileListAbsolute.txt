@@ -27,3 +27,4 @@ C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_
 C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.csproj.CoreCompileInputs.cache
 C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.exe
 C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.pdb
+C:\Users\rober\Desktop\GIT Repositories\Genetic_algorithm_test\Genetischer_algo_test_1\obj\Debug\Genetischer_algo_test_1.csprojAssemblyReference.cache

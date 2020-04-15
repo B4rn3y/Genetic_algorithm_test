@@ -185,7 +185,7 @@ namespace Genetischer_algo_test_1
             }
             
 
-            Neural_Network offspring = new Neural_Network(management.neural_networks.Count, management.inputs, management.outputs, management, management.bias_enabled, true)
+            Neural_Network offspring = new Neural_Network( management.inputs, management.outputs, management, management.bias_enabled, true)
             {
                 layers = 3
             };

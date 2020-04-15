@@ -13,7 +13,7 @@ namespace Genetischer_algo_test_1
         public double coeffecient_weights = 0.4;
         public int N_switch = 20; // the amount of genes needed in a net in order to take effect in the compatability distance function
 
-        public double species_threshold = 1; // the allowed compatability distance of two nets to be determined as the same species
+        public double species_threshold = 3; // the allowed compatability distance of two nets to be determined as the same species
 
         public double average_species_fitness = 0;
         public double average_fitness_sum = 0;
@@ -40,7 +40,6 @@ namespace Genetischer_algo_test_1
         {
             double average_fitness = 0;
             // update the average fitness of every species
-            Console.WriteLine("species count = {0}", species.Count);
             for(int i = 0; i < species.Count; i++)
             {
                 species[i].update_average_fitness();
@@ -56,20 +55,24 @@ namespace Genetischer_algo_test_1
                 average_species_fitness = 0;
             }
             average_fitness_sum = average_fitness;
-
-            Console.WriteLine("average_species_fitness = {0} - average_fitness_sum = {1}", average_species_fitness, average_fitness_sum);
+            
         }
 
         // calculates the allowed pop size of each species depending on their achieved fitness
         public void calculate_allowed_pop_size_of_species()
         {
-            update_average_species_fitness(); // first update the fitness of all species
+            
             // loop through every species
             for (int i= 0; i<species.Count; i++)
             {
                 double pop_size = management.population_size * (species[i].average_fitness / average_fitness_sum);
-                species[i].allowed_pop_size = Math.Round(pop_size);
-                Console.WriteLine(String.Format("Species: {0} - allowed pop size: {1}", species[i].id, species[i].allowed_pop_size));
+                if (pop_size <= 0)
+                {
+                    species[i].allowed_pop_size = 0;
+                } else
+                {
+                    species[i].allowed_pop_size = Math.Round(pop_size);
+                }
             }
         }
 
@@ -77,6 +80,9 @@ namespace Genetischer_algo_test_1
         // loops through every network to calculate which species it belongs to - if no matching species is found, it creates a new one
         public void group_networks_into_species()
         {
+            int existing_species_added = 0;
+            int new_species_created = 0;
+
             // loop through every neural net
             for(int i = 0; i < management.neural_networks.Count; i++)
             {
@@ -86,6 +92,7 @@ namespace Genetischer_algo_test_1
                     management.neural_networks[i].species = cur_spec;
                     species.Add(cur_spec);
                     species_counter++;
+                    new_species_created++;
                 }
                 else
                 {
@@ -99,6 +106,7 @@ namespace Genetischer_algo_test_1
                             species[h].population.Add(management.neural_networks[i]);
                             management.neural_networks[i].species = species[h];
                             found_match = true;
+                            existing_species_added++;
                             break;
                         }
                     }
@@ -109,12 +117,13 @@ namespace Genetischer_algo_test_1
                         management.neural_networks[i].species = cur_species;
                         species.Add(cur_species);
                         species_counter++;
+                        new_species_created++;
                     }
                 }
             }
-            Console.WriteLine("We have {0} species before deletion", species.Count);
             delete_empty_species();
-            Console.WriteLine("We have {0} species after deletion", species.Count); 
+
+            
         }
 
         public void delete_empty_species()
@@ -127,16 +136,14 @@ namespace Genetischer_algo_test_1
                 {
                     species_to_remove.Add(species[i]);
                 }
-                else
-                {
-                    Console.WriteLine("Species: {0} - Pop size: {1}",species[i].id, species[i].population.Count);
-                }
             }
 
             for(int i = 0; i < species_to_remove.Count; i++)
             {
                 species.Remove(species_to_remove[i]);
             }
+
+            Console.WriteLine("Deleted {0} species", species_to_remove.Count);
         }
 
         public void clear_species() // this functions deletes every species besides the 2 best performing species
@@ -166,22 +173,108 @@ namespace Genetischer_algo_test_1
             species = best_species;
         }
 
+        public void calculate_species_best_net()
+        {
+            for(int i = 0; i < species.Count; i++)
+            {
+                species[i].claculate_best_net();
+            }
+        }
+
+        public void sort_species()
+        {
+            calculate_species_best_net();
+
+            List<Species> species_copy = new List<Species>();
+
+            for(int i = 0; i < species.Count; i++)
+            {
+                species_copy.Add(species[i]);
+            }
+
+            List<Species> species_copy_result = new List<Species>();
+
+            double highest_fittness = double.MinValue;
+            int index = 0;
+
+            for (int i = 0; i < species.Count; i++)
+            {
+                for(int h = 0; h < species_copy.Count; h++)
+                {
+                    if(species_copy[h].best_net.fitness > highest_fittness)
+                    {
+                        index = h;
+                        highest_fittness = species_copy[h].best_net.fitness;
+                    }
+                    else if(species_copy[h].best_net.fitness == highest_fittness && species_copy[h].average_fitness > species_copy[index].average_fitness)
+                    {
+                        index = h;
+                    }
+                }
+                
+                species_copy_result.Add(species_copy[index]);
+
+                species_copy.RemoveAt(index);
+
+                highest_fittness = double.MinValue;
+                index = 0;
+            }
+
+            species = species_copy_result;
+        }
+
+        public void terminate_stagnating_species()
+        {
+            List<Species> species_to_delete = new List<Species>();
+
+            for (int i = 0; i < species.Count; i++)
+            {
+                Species cur_species = species[i];
+                if (((cur_species.species_generation_counter - cur_species.last_fittness_increase) > management.no_progress_species_deletion_threshold) && (i > (management.amount_of_species_to_keep - 1)))
+                {
+                    species_to_delete.Add(cur_species);
+                }
+            }
+
+            for (int i = 0; i < species_to_delete.Count; i++)
+            {
+                
+                species.Remove(species_to_delete[i]);
+            }
+            Console.WriteLine("{0} stagnating Species were deleted", species_to_delete.Count);
+        }
+
+        public void increment_species_generation()
+        {
+            for (int i = 0; i < species.Count; i++)
+            {
+                species[i].species_generation_counter += 1;
+            }
+        }
+
         // this method kills the worst half of all species and replaces the entire population then with the offspring of the remaining best half of the species
         public void create_offspring()
         {
-            calculate_allowed_pop_size_of_species();
+            
 
             management.neural_networks = new List<Neural_Network>();
 
             for(int i = 0; i < species.Count; i++) // loop through every species
             {
-                List<Neural_Network> species_pop_copy = species[i].population;
+                List<Neural_Network> species_pop_copy = new List<Neural_Network>();
+
+                for(int h = 0; h < species[i].population.Count; h++)
+                {
+                    species_pop_copy.Add(species[i].population[h]);
+                }
+
                 int worst_net_index = 0;
-                double lowest_fitness = double.MinValue;
+                double lowest_fitness = double.MaxValue;
                 double pop_half = species[i].population.Count / 2;
+                pop_half = Math.Round(pop_half);
 
 
-                for (int p = 0; p < Math.Round(pop_half); p++) // delete the worst half of this species
+                for (int p = 0; p < pop_half; p++) // delete the worst half of this species
                 {
                     for(int h = 0; h < species_pop_copy.Count; h++) // loop through every remaining net in this list to get the worst every time
                     {
@@ -191,7 +284,7 @@ namespace Genetischer_algo_test_1
                             lowest_fitness = species_pop_copy[h].fitness;
                         }
                     }
-
+                    lowest_fitness = double.MaxValue;
                     species_pop_copy.RemoveAt(worst_net_index); // delete the worst net
                 }
 
@@ -203,27 +296,37 @@ namespace Genetischer_algo_test_1
                     if(species_pop_copy[u].fitness > highest_fittnes)
                     {
                         best_net_index = u;
+                        highest_fittnes = species_pop_copy[u].fitness;
                     }
                 }
 
-                Neural_Network best_net_species = species_pop_copy[best_net_index];
+                
 
+                Neural_Network best_net_species = species_pop_copy[best_net_index];
+                if (best_net_species.fitness <= species[i].representative.fitness)
+                {
+                    best_net_species = species[i].representative;
+                }
 
                 species[i].population = new List<Neural_Network>(); // delete the population of the species
 
-                species[i].population.Add(best_net_species);
+                //species[i].population.Add(best_net_species);
+                management.neural_networks.Add(best_net_species);
 
                 double amount_of_nets_to_mutate = Math.Round(species[i].allowed_pop_size / 4) - 1; // 25% of offsrping results from mutation without crossover
 
                 for(int k = 0; k < amount_of_nets_to_mutate; k++)
                 {
                     Neural_Network net_to_muatate = species_pop_copy[management.getRandomNumber_int(species_pop_copy.Count)];
-                    net_to_muatate.check_mutations();
-                    //species[i].population.Add(net_to_muatate);
-                    management.neural_networks.Add(net_to_muatate);
+                    if (net_to_muatate != best_net_species)
+                    {
+                        net_to_muatate.check_mutations();
+                        //species[i].population.Add(net_to_muatate);
+                        management.neural_networks.Add(net_to_muatate);
+                    }
                 }
 
-                for(int h = 0; h < (species[i].allowed_pop_size - amount_of_nets_to_mutate) - 1; h++) //create the offspring of the remaining not eleminated nets and add it to the population of the species
+                for(int h = 0; h < (species[i].allowed_pop_size - amount_of_nets_to_mutate); h++) //create the offspring of the remaining not eleminated nets and add it to the population of the species
                 {
                     Neural_Network offspring = management.crossover_nets.get_crossover(species_pop_copy[management.getRandomNumber_int(species_pop_copy.Count)], species_pop_copy[management.getRandomNumber_int(species_pop_copy.Count)]);
 

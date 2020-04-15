@@ -105,7 +105,6 @@ namespace Genetischer_algo_test_1
             {
                 Window_width = pnlClient.ActualWidth;
                 Window_height = pnlClient.ActualHeight;
-                Console.WriteLine(String.Format("Window:{0}:{1}", pnlClient.ActualWidth, pnlClient.ActualHeight));
             }
         }
 
@@ -163,10 +162,21 @@ namespace Genetischer_algo_test_1
                 txtNum.Text = _numValue.ToString();
         }
 
-        private void BTN_calculate_generations_Click(object sender, RoutedEventArgs e)
+        private async void BTN_calculate_generations_Click(object sender, RoutedEventArgs e)
         {
+            int last_pause = 0;
+            int generations_to_calculate_between_pauses = 25;
+
             for(int i = 0; i < _numValue; i++)
             {
+                /*
+                if((last_pause + generations_to_calculate_between_pauses) <= i)
+                {
+                    await Task.Delay(2000);
+                    last_pause = i;
+                }
+                */
+                await Task.Delay(200);
                 managment.next_gen();
                 updater_log.update_log(String.Format("Generation {0} was generated.", managment.generation_counter));
                 if(managment.best_fittness >= managment.max_fittness)

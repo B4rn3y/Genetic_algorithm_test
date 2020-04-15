@@ -14,21 +14,24 @@ namespace Genetischer_algo_test_1
         public double node_activation_threshold = 0.5;
         public double best_fittness = double.MinValue;
         public int last_fittness_increase_generation_id = 0;
-        public double max_fittness = 2000;
+        public double max_fittness = 1940;
+        public int amount_of_species_to_keep = 5;
         public bool running = false;
         public bool paused = false;
         public bool stopped = false;
         public int inputs = 2, outputs = 1;
         public int generation_counter = 1;
         public int mutation_rate = 5;
-        public int no_progress_deletion_threshold = 20;
+        public int no_progress_species_deletion_threshold = 15;
+        public int no_progress_deletion_threshold = 5000;
+        public int NN_counter = 0;
         public Net_Drawer drawer;
         public Log_Updater updater;
         public Neural_Network best_net;
         public Neural_Network cur_net;
         public bool bias_enabled = false;
         public List<Neural_Network> neural_networks = new List<Neural_Network>();
-        public static Random random = new Random(8);
+        public static Random random = new Random(105);
         public Speciesism species_manager;
         public Crossover crossover_nets;
 
@@ -79,7 +82,7 @@ namespace Genetischer_algo_test_1
             for (int i = 0; i < pop_size; i++)
             {
                 updater.update_log(String.Format("Creating net: {0}", i));
-                Neural_Network cur_net = new Neural_Network(i, inputs, outputs, this, bias_enabled);
+                Neural_Network cur_net = new Neural_Network(inputs, outputs, this, bias_enabled);
                 
                 neural_networks.Add(cur_net);   
             }
@@ -90,6 +93,7 @@ namespace Genetischer_algo_test_1
 
         public void next_gen()
         {
+            Console.WriteLine("Generation: {0} - pop size: {1} - species size: {2} ----------------------------------------------------------------------------------------------------------------------------------------------------",generation_counter, neural_networks.Count, species_manager.species.Count);
             // 1: fitness function
             // 2: specification
             // 3: create offspring
@@ -97,7 +101,6 @@ namespace Genetischer_algo_test_1
 
             // fittnes function call
             stopped = false;
-            Console.WriteLine("Start fittness functions for {0} nets", neural_networks.Count);
             for (int i = 0; i < neural_networks.Count; i++)
             {
                 neural_networks[i].fitness = 0;
@@ -105,24 +108,33 @@ namespace Genetischer_algo_test_1
 
             }
             get_best_net(); // get best net
+            species_manager.increment_species_generation();
             species_manager.group_networks_into_species(); // group nets into species
-            check_progress();
-            species_manager.create_offspring(); // create the offspring of the nets. 25% of the offspring gets mutated, the rest gets created through crossover. Here the adjustet fittness functions calculate the amount of offspring each species is allowed to have
+            species_manager.update_average_species_fitness(); // first update the fitness of all species
+            species_manager.sort_species();
+            species_manager.calculate_allowed_pop_size_of_species();
+
+            for (int i = 0; i < species_manager.species.Count; i++)
+            {
+                Console.WriteLine("Species: {0} - best_fittness: {3} - best_net_id: {5} - average_fittness: {2} - population: {1} - allowed_pop: {4}", species_manager.species[i].id, species_manager.species[i].population.Count, species_manager.species[i].average_fitness, species_manager.species[i].best_net.fitness, species_manager.species[i].allowed_pop_size, species_manager.species[i].best_net.id);
+                //Console.WriteLine("Species: {0} - representative: {1} - fittness: {2}", species_manager.species[i].id, species_manager.species[i].representative.id, species_manager.species[i].representative.fitness);
+                /*
+                for (int h = 0; h < species_manager.species[i].population.Count; h++)
+                {
+                    Console.WriteLine("Species: {0} - net: {1} - fittness: {2}", species_manager.species[i].id, species_manager.species[i].population[h].id, species_manager.species[i].population[h].fitness);
+                }
+                */
+            }
+
+            species_manager.terminate_stagnating_species();
+            species_manager.calculate_allowed_pop_size_of_species();
+            species_manager.create_offspring(); // create the offspring of the nets. 25% of the offspring gets mutated, the rest gets created through crossover. Here the adjusted fittness functions calculate the amount of offspring each species is allowed to have
 
             generation_counter += 1;
             drawer.update_generation_id(generation_counter);
 
 
             drawer.draw_net(best_net);
-        }
-
-        public void check_progress()
-        {
-            if((generation_counter - last_fittness_increase_generation_id) > no_progress_deletion_threshold)
-            {
-                species_manager.clear_species();
-                Console.WriteLine("Deleting all species besides the best 2");
-            }
         }
         
         public void remove_display()
@@ -206,7 +218,14 @@ namespace Genetischer_algo_test_1
                 network_tested.fitness += 500;
             }
 
-            //network_tested.fitness = network_tested.fitness - (network_tested.nn_connections.Count * 5);
+            //network_tested.fitness = network_tested.fitness - (network_tested.nn_connections.Count * 10);
+            for(int i = 0; i < network_tested.nn_connections.Count; i++)
+            {
+                if(!(network_tested.nn_connections[i].disabled))
+                {
+                    network_tested.fitness -= 10;
+                }
+            }
         }
 
     }

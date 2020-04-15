@@ -17,26 +17,71 @@ namespace Genetischer_algo_test_1
         public double maximum = 2;
         public int mutate_weight_random_prob = 80;
         public int mutate_weight_shift_prob = 30;
-        public double mutate_connection_prob = 0.05;
-        public double mutate_node_prob = 0.03;
-        public double mutate_remove_node = 0.02;
-        public double mutate_enable_disable_connection = 0.05;
+        public double mutate_connection_prob = 5;
+        public double mutate_node_prob = 1;
+        public double mutate_remove_node = 0.8;
+        public double mutate_enable_disable_connection = 0.3;
         public List<Node> nn_nodes = new List<Node>();
         public List<Connection> nn_connections = new List<Connection>();
         public NEAT_management management;
         public Species species;
+
+        // to do: new nodes should not disconnect the bias; keep a history of species that dont improve for 15 gen and kill them; always set the best perfoming net as the repr. for the species; change the weight mutation shit - mutate every weight of a net
        
 
         // initialize the NN with the right amount of inputs and outputs
-        public Neural_Network(int id, int inputs, int outputs, NEAT_management management, bool bias_enabled, bool crossover = false)
+        public Neural_Network(int inputs, int outputs, NEAT_management management, bool bias_enabled, bool crossover = false)
         {
-            this.id = id;
+            this.id = management.NN_counter;
+            management.NN_counter += 1;
             this.inputs = inputs;
             this.outputs = outputs;
             this.management = management;
             this.bias_enabled = bias_enabled;
             create_network(inputs, outputs, id, crossover);
         }
+
+        // checks if to mutate the neural network
+        public void check_mutations()
+        {
+            // add a new connection to the net - cur. 5%
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_connection_prob)
+            {
+                add_connection();
+            }
+            // mutate weight - cur. 80%
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_weight_random_prob)
+            {
+                //mutate_connection_weight_random();
+                mutate_all_connections();
+            }
+            // add new node - cur. 1%
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_node_prob)
+            {
+                add_node();
+            }
+            
+            // remove node - cur. 1%
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_remove_node)
+            {
+                remove_node();
+            }
+            
+            // enable_disable_connection - cur. 2.5%
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_enable_disable_connection)
+            {
+                enable_disable_connection();
+            }
+            /*
+            // mutate the weight of a connection by dividing it - cur. 30%
+            if (management.getRandomNumber_double(0, 100) <= this.mutate_weight_shift_prob)
+            {
+                mutate_weight_shift();
+            }
+            */
+        }
+
+
         // calculate the output for the net depending on the input - WIP
         public List<double> get_output(List<double> the_inputs)
         {
@@ -64,7 +109,7 @@ namespace Genetischer_algo_test_1
                     }
                     for (int h = 0; h < nn_connections.Count; h++)
                     {
-                        if (input_nodes.Contains(nn_connections[h].start_node))
+                        if (input_nodes.Contains(nn_connections[h].start_node) && !nn_connections[h].disabled)
                         {
                             // do not multiply with the bias node! output = sum(weights*inputs)+bias // bias is always 1
                             if(nn_connections[h].start_node.bias)
@@ -87,13 +132,13 @@ namespace Genetischer_algo_test_1
                         }
                     }
 
-                    for(int u = 0; u<output_nodes.Count;u++)
+                    for(int u = 0; u < output_nodes.Count; u++)
                     {
                         Node cur_node = output_nodes[u];
                         for(int o = 0; o<nn_connections.Count; o++)
                         {
                             Connection cur_connection = nn_connections[o];
-                            if(cur_connection.end_node == cur_node)
+                            if(cur_connection.end_node == cur_node && !nn_connections[o].disabled)
                             {
                                 cur_node.value += cur_connection.value;
                             }
@@ -119,11 +164,11 @@ namespace Genetischer_algo_test_1
                         for (int h = 0; h < nn_connections.Count; h++)
                         {
                             Connection cur_connection = nn_connections[h];
-                            if(cur_connection.start_node == cur_node)
+                            if(cur_connection.start_node == cur_node && !cur_connection.disabled)
                             {
                                 leading_connection.Add(cur_connection);
                             }
-                            else if(cur_connection.end_node == cur_node)
+                            else if(cur_connection.end_node == cur_node && !cur_connection.disabled)
                             {
                                 cur_node.value += cur_connection.value;
                             }
@@ -162,6 +207,14 @@ namespace Genetischer_algo_test_1
         public static double Sigmoid(double value)
         {
             return 1.0f / (1.0f + Math.Exp(-value));
+        }
+
+        public void mutate_all_connections()
+        {
+            for(int i = 0; i < nn_connections.Count; i++)
+            {
+                nn_connections[i].weight = management.getRandomNumber_double(minimum,maximum);
+            }
         }
 
         // create the nework starting with the minimun Nodes needed for it (Input and Output Nodes + bias) + the Connections
@@ -220,40 +273,7 @@ namespace Genetischer_algo_test_1
             }
         }
 
-        // checks if to mutate the neural network
-        public void check_mutations()
-        {
-            // add a new connection to the net - cur. 5%
-            if (management.getRandomNumber_double(0, 100) <= this.mutate_connection_prob)
-            {
-                add_connection();
-            }
-            // mutate weight - cur. 80%
-            if (management.getRandomNumber_double(0,100) <= this.mutate_weight_random_prob)
-            {
-                mutate_connection_weight_random();
-            }
-            // add new node - cur. 1%
-            if (management.getRandomNumber_double(0, 100) <= this.mutate_node_prob)
-            {
-                add_node();
-            }
-            // remove node - cur. 1%
-            if (management.getRandomNumber_double(0, 100) <= this.mutate_remove_node)
-            {
-                remove_node();
-            }
-            // enable_disable_connection - cur. 2.5%
-            if (management.getRandomNumber_double(0, 100) <= this.mutate_enable_disable_connection)
-            {
-                enable_disable_connection();
-            }
-            // mutate the weight of a connection by dividing it - cur. 30%
-            if (management.getRandomNumber_double(0, 100) <= this.mutate_weight_shift_prob)
-            {
-                mutate_weight_shift();
-            }
-        }
+        
         // checks whether some nodes that are connected sit on the same layer(what they shouldnt); if it finds something like this it takes action by incrementing the layer of the end node. This does it as long as its needed for the net to be in order again
         public void check_net_nature()
         {
@@ -300,7 +320,7 @@ namespace Genetischer_algo_test_1
 
             for(int i = 0; i< nn_connections.Count; i++)
             {
-                if(!(nn_connections[i].disabled))
+                if(!(nn_connections[i].disabled) && !nn_connections[i].start_node.bias) // do not disconnect the bias
                 {
                     node_addable_connection.Add(nn_connections[i]);
                 }
@@ -387,7 +407,7 @@ namespace Genetischer_algo_test_1
                     {
                         Node cur_end_node = nn_nodes[k];
                         // Connection only possible when: The Nodes arent the same node; the layer of the end Node is higher or equal to the layer of the start node; the end node cant be a input or bias node
-                        if (!(cur_start_node == cur_end_node) && cur_end_node.layer >= cur_start_node.layer && !(cur_end_node.input || cur_end_node.bias))
+                        if (!(cur_start_node == cur_end_node) && cur_end_node.layer > cur_start_node.layer && !(cur_end_node.input || cur_end_node.bias))
                         {
                             // check every established connection if this connection already exists
                             bool new_connection = true;
